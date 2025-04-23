@@ -405,8 +405,8 @@ MonoBehaviour:
   - {fileID: 3689332886976680734, guid: 751032eb80ccfc346902e2f2ceb8938e, type: 3}
   - {fileID: 3689332886976680734, guid: 7567fac857b43424cbf3421fb62e104a, type: 3}
   specialCandyPrefabs:
-  - {fileID: 8400692291886326403, guid: 140d208abbf6b544e9770a0524650042, type: 3}
   - {fileID: 8400692291886326403, guid: c104b93307dce5a4ba002477fb628c5c, type: 3}
+  - {fileID: 8400692291886326403, guid: 140d208abbf6b544e9770a0524650042, type: 3}
   - {fileID: 8400692291886326403, guid: 9d7bf92e0b1bfb542b8c7c1c7c688c6b, type: 3}
   scoreText: {fileID: 1302534969}
   gridWidth: 8
