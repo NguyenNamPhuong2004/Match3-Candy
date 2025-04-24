@@ -7,8 +7,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     public GameObject[] candyPrefabs;
-    public GameObject[] specialCandyPrefabs; // 0: StripedH, 1: StripedV, 2: Wrapped
-    public Text scoreText; // UI Text cho điểm số
+    public GameObject[] specialCandyPrefabs; // 0: StripedH, 1: StripedV, 2: Wrapped, 3: ColorBomb
+    public Text scoreText;
     public int gridWidth = 8;
     public int gridHeight = 8;
     private Candy[,] candyGrid;
@@ -62,8 +62,10 @@ public class GameManager : MonoBehaviour
         if (specialType != Candy.SpecialType.None)
         {
             int index = specialType == Candy.SpecialType.StripedHorizontal ? 0 :
-                        specialType == Candy.SpecialType.StripedVertical ? 1 : 2;
+                        specialType == Candy.SpecialType.StripedVertical ? 1 :
+                        specialType == Candy.SpecialType.Wrapped ? 2 : 3;
             prefab = specialCandyPrefabs[index];
+            Debug.Log($"Spawning special candy at ({row}, {col}): {specialType}, prefab: {prefab.name}");
         }
         else
         {
@@ -71,6 +73,7 @@ public class GameManager : MonoBehaviour
         }
 
         GameObject candyObj = Instantiate(prefab, new Vector3(col, gridHeight), Quaternion.identity);
+        if (specialType == Candy.SpecialType.StripedHorizontal) candyObj.transform.Rotate(0, 0, 90);
         Candy candy = candyObj.GetComponent<Candy>();
         candy.row = row;
         candy.column = col;
@@ -126,13 +129,93 @@ public class GameManager : MonoBehaviour
         yield return StartCoroutine(AnimateSwap(candy1, candy2));
         SwapCandies(candy1, candy2);
 
-        List<Candy> matches = CheckMatches();
         bool hasSpecialEffect = candy1.isSpecial || candy2.isSpecial;
+        List<Candy> matches = CheckMatches();
 
         if (hasSpecialEffect)
         {
-            candy1.TriggerSpecialEffect();
-            candy2.TriggerSpecialEffect();
+            if (candy1.isSpecial && candy2.isSpecial)
+            {
+                if (candy1.specialType == Candy.SpecialType.StripedHorizontal || candy1.specialType == Candy.SpecialType.StripedVertical)
+                {
+                    if (candy2.specialType == Candy.SpecialType.StripedHorizontal || candy2.specialType == Candy.SpecialType.StripedVertical)
+                    {
+                        ClearRow(candy1.row);
+                        ClearColumn(candy1.column);
+                        ClearRow(candy2.row);
+                        ClearColumn(candy2.column);
+                        AddScore(1000);
+                    }
+                    else if (candy2.specialType == Candy.SpecialType.Wrapped)
+                    {
+                        ClearMultipleRows(candy1.row);
+                        ClearMultipleColumns(candy1.column);
+                        AddScore(1500);
+                    }
+                    else if (candy2.specialType == Candy.SpecialType.ColorBomb)
+                    {
+                        StartCoroutine(ActivateStripedCandies(candy1.type));
+                        AddScore(2000);
+                    }
+                }
+                else if (candy1.specialType == Candy.SpecialType.Wrapped)
+                {
+                    if (candy2.specialType == Candy.SpecialType.Wrapped)
+                    {
+                        ClearLargeArea(candy1.row, candy1.column);
+                        ClearLargeArea(candy2.row, candy2.column);
+                        AddScore(1500);
+                    }
+                    else if (candy2.specialType == Candy.SpecialType.ColorBomb)
+                    {
+                        StartCoroutine(ActivateWrappedCandies(candy1.type));
+                        AddScore(2000);
+                    }
+                }
+                else if (candy1.specialType == Candy.SpecialType.ColorBomb)
+                {
+                    if (candy2.specialType == Candy.SpecialType.ColorBomb)
+                    {
+                        ClearAll();
+                        AddScore(2500);
+                    }
+                    else if (candy2.specialType == Candy.SpecialType.StripedHorizontal || candy2.specialType == Candy.SpecialType.StripedVertical)
+                    {
+                        StartCoroutine(ActivateStripedCandies(candy2.type));
+                        AddScore(2000);
+                    }
+                    else if (candy2.specialType == Candy.SpecialType.Wrapped)
+                    {
+                        StartCoroutine(ActivateWrappedCandies(candy2.type));
+                        AddScore(2000);
+                    }
+                }
+                candyGrid[candy1.row, candy1.column] = null;
+                candyGrid[candy2.row, candy2.column] = null;
+                Destroy(candy1.gameObject);
+                Destroy(candy2.gameObject);
+            }
+            else
+            {
+                if (candy1.specialType == Candy.SpecialType.ColorBomb)
+                {
+                    candy1.TriggerSpecialEffect(candy2);
+                    candyGrid[candy1.row, candy1.column] = null;
+                    Destroy(candy1.gameObject);
+                }
+                else if (candy2.specialType == Candy.SpecialType.ColorBomb)
+                {
+                    candy2.TriggerSpecialEffect(candy1);
+                    candyGrid[candy2.row, candy2.column] = null;
+                    Destroy(candy2.gameObject);
+                }
+                else
+                {
+                    candy1.TriggerSpecialEffect();
+                    candy2.TriggerSpecialEffect();
+                }
+            }
+            yield return StartCoroutine(FillEmptySpaces());
             yield return StartCoroutine(ProcessMatches());
         }
         else if (matches.Count > 0)
@@ -143,11 +226,13 @@ public class GameManager : MonoBehaviour
         {
             yield return StartCoroutine(AnimateSwap(candy1, candy2));
             SwapCandies(candy1, candy2);
+        }
+
+        if (firstSelectedCandy != null)
+        {
             firstSelectedCandy.transform.localScale = Vector3.one * 0.5f;
             firstSelectedCandy = null;
         }
-
-
         isProcessing = false;
     }
 
@@ -185,75 +270,89 @@ public class GameManager : MonoBehaviour
     {
         List<Candy> matches = new List<Candy>();
         HashSet<Candy> uniqueMatches = new HashSet<Candy>();
+        specialCandies.Clear();
 
-        // Match ngang
+        // Check ngang
         for (int row = 0; row < gridHeight; row++)
         {
-            for (int col = 0; col < gridWidth - 2; col++)
+            int col = 0;
+            while (col < gridWidth - 2)
             {
                 if (IsValidMatch3(row, col, 0, 1))
                 {
-                    Debug.Log("(IsValidMatch(row, col, 0, 1)");
+                    Debug.Log($"IsValidMatch(row={row}, col={col}, 0, 1)");
                     int matchLength = 3;
                     while (col + matchLength < gridWidth && IsValidMatchMore3(row, col, 0, matchLength))
                     {
                         matchLength++;
-                        Debug.Log(matchLength);
+                        Debug.Log($"Match length extended to {matchLength}");
                     }
                     for (int i = 0; i < matchLength; i++)
                     {
                         uniqueMatches.Add(candyGrid[row, col + i]);
+                        candyGrid[row, col + i].isMatched = true;
                     }
-                    if (matchLength == 4)
+                    if (matchLength >= 5)
                     {
-                        Debug.Log("H");
-                        specialCandies.Add((new Vector2Int(row, col + 1), Candy.SpecialType.StripedHorizontal));
+                        Debug.Log($"H2: Creating ColorBomb at ({row}, {col + 2}) for match length {matchLength}");
+                        specialCandies.Add((new Vector2Int(row, col + 2), Candy.SpecialType.ColorBomb));
                     }
-                    else if (matchLength >= 5)
+                    else if (matchLength == 4)
                     {
-                        Debug.Log("H2");
-                        specialCandies.Add((new Vector2Int(row, col + 2), Candy.SpecialType.Wrapped));
+                        Debug.Log($"H: Creating StripedVertical at ({row}, {col + 1})");
+                        specialCandies.Add((new Vector2Int(row, col + 1), Candy.SpecialType.StripedVertical));
                     }
                     AddScore(matchLength * 100);
+                    col += matchLength; // Bỏ qua các cột đã xử lý
+                }
+                else
+                {
+                    col++;
                 }
             }
         }
 
-        // Match dọc
+        // Check dọc
         for (int col = 0; col < gridWidth; col++)
         {
-            for (int row = 0; row < gridHeight - 2; row++)
+            int row = 0;
+            while (row < gridHeight - 2)
             {
                 if (IsValidMatch3(row, col, 1, 0))
                 {
-                    Debug.Log("(IsValidMatch(row, col, 1, 0)");
+                    Debug.Log($"IsValidMatch(row={row}, col={col}, 1, 0)");
                     int matchLength = 3;
                     while (row + matchLength < gridHeight && IsValidMatchMore3(row, col, matchLength, 0))
                     {
                         matchLength++;
-                        Debug.Log(matchLength);
+                        Debug.Log($"Match length extended to {matchLength}");
                     }
                     for (int i = 0; i < matchLength; i++)
                     {
                         uniqueMatches.Add(candyGrid[row + i, col]);
+                        candyGrid[row + i, col].isMatched = true;
                     }
-                    if (matchLength == 4)
+                    if (matchLength >= 5)
                     {
-                        Debug.Log("V");
-                        specialCandies.Add((new Vector2Int(row + 1, col), Candy.SpecialType.StripedVertical));
+                        Debug.Log($"V2: Creating ColorBomb at ({row + 2}, {col}) for match length {matchLength}");
+                        specialCandies.Add((new Vector2Int(row + 2, col), Candy.SpecialType.ColorBomb));
                     }
-                    else if (matchLength >= 5)
+                    else if (matchLength == 4)
                     {
-                        Debug.Log("V2");
-                        specialCandies.Add((new Vector2Int(row + 2, col), Candy.SpecialType.Wrapped));
+                        Debug.Log($"V: Creating StripedHorizontal at ({row + 1}, {col})");
+                        specialCandies.Add((new Vector2Int(row + 1, col), Candy.SpecialType.StripedHorizontal));
                     }
                     AddScore(matchLength * 100);
+                    row += matchLength; // Bỏ qua các hàng đã xử lý
+                }
+                else
+                {
+                    row++;
                 }
             }
         }
 
-        // Match chữ L/T
-
+        // Check L và T
         for (int row = 0; row < gridHeight - 2; row++)
         {
             for (int col = 0; col < gridWidth - 2; col++)
@@ -271,19 +370,22 @@ public class GameManager : MonoBehaviour
 
         matches.AddRange(uniqueMatches);
 
-        // Tạo kẹo đặc biệt
-        Debug.Log(specialCandies.Count);
         foreach (var special in specialCandies)
         {
             Vector2Int pos = special.pos;
-            if (matches.Contains(candyGrid[pos.x, pos.y]))
+            if (pos.x >= 0 && pos.x < gridHeight && pos.y >= 0 && pos.y < gridWidth && candyGrid[pos.x, pos.y] != null)
             {
-                matches.Remove(candyGrid[pos.x, pos.y]);
+                if (matches.Contains(candyGrid[pos.x, pos.y]))
+                {
+                    matches.Remove(candyGrid[pos.x, pos.y]);
+                    candyGrid[pos.x, pos.y].isMatched = false;
+                }
             }
         }
 
         return matches;
     }
+
     bool CheckLShape(int row, int col, HashSet<Candy> matches)
     {
         if (row + 2 >= gridHeight || col + 2 >= gridWidth) return false;
@@ -343,7 +445,7 @@ public class GameManager : MonoBehaviour
             {
                 int r = row + rows[i];
                 int c = col + cols[i];
-                if (r < 0 || r >= gridHeight || c < 0 || c >= gridWidth || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type)
+                if (r < 0 || r >= gridHeight || c < 0 || c < gridWidth || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type)
                     return false;
             }
             for (int i = 0; i < 5; i++)
@@ -388,6 +490,7 @@ public class GameManager : MonoBehaviour
         return candy1 != null && candy2 != null && candy3 != null &&
                candy1.type == candy2.type && candy1.type == candy3.type;
     }
+
     bool IsValidMatchMore3(int row, int col, int rowOffset, int colOffset)
     {
         if (row + rowOffset >= gridHeight || col + colOffset >= gridWidth || row < 0 || col < 0)
@@ -400,112 +503,87 @@ public class GameManager : MonoBehaviour
                candy1.type == candy2.type;
     }
 
-    bool CheckLShape(int row, int col)
-    {
-        if (row + 2 >= gridHeight || col + 2 >= gridWidth) return false;
-
-        Candy center = candyGrid[row + 1, col + 1];
-        if (center == null) return false;
-
-        bool[,] patterns = new bool[3, 3];
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                Candy candy = candyGrid[row + i, col + j];
-                patterns[i, j] = candy != null && candy.type == center.type;
-            }
-        }
-        //L
-        if (patterns[0, 0] && patterns[0, 1] && patterns[0, 2] && patterns[1, 0] && patterns[2, 0])
-        {
-            return true;
-        }
-        if (patterns[0, 0] && patterns[0, 1] && patterns[0, 2] && patterns[1, 2] && patterns[2, 2])
-        {
-            return true;
-        }
-        if (patterns[2, 0] && patterns[2, 1] && patterns[0, 2] && patterns[1, 0] && patterns[2, 0])
-        {
-            return true;
-        }
-        if (patterns[2, 0] && patterns[2, 1] && patterns[0, 2] && patterns[1, 2] && patterns[2, 2])
-        {
-            return true;
-        }
-        //T
-        if (patterns[0, 0] && patterns[0, 1] && patterns[0, 2] && patterns[1, 1] && patterns[2, 1])
-        {
-            return true;
-        }
-        if (patterns[1, 0] && patterns[1, 1] && patterns[1, 2] && patterns[0, 2] && patterns[2, 2])
-        {
-            return true;
-        }
-        if (patterns[2, 0] && patterns[2, 1] && patterns[0, 2] && patterns[1, 1] && patterns[2, 1])
-        {
-            return true;
-        }
-        if (patterns[1, 0] && patterns[1, 1] && patterns[1, 2] && patterns[0, 2] && patterns[2, 2])
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    void AddLShapeMatches(HashSet<Candy> matches, int row, int col)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                if (candyGrid[row + i, col + j] != null)
-                {
-                    matches.Add(candyGrid[row + i, col + j]);
-                }
-            }
-        }
-    }
-
-    void AddScore(int points)
-    {
-        score += points;
-        UpdateScoreUI();
-    }
-
     public void ClearRow(int row)
     {
+        List<Candy> specialCandiesToTrigger = new List<Candy>();
+        List<Candy> candiesToShrink = new List<Candy>();
+
         for (int col = 0; col < gridWidth; col++)
         {
             if (candyGrid[row, col] != null)
             {
-                StartCoroutine(ShrinkCandy(candyGrid[row, col]));
+                Candy candy = candyGrid[row, col];
+                if (candy.isSpecial)
+                {
+                    specialCandiesToTrigger.Add(candy);
+                }
+                candiesToShrink.Add(candy);
                 candyGrid[row, col] = null;
             }
         }
-        StartCoroutine(FillEmptySpaces());
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                StartCoroutine(ShrinkCandy(candy));
+            }
+        }
+
+        foreach (Candy candy in specialCandiesToTrigger)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                candy.TriggerSpecialEffect();
+            }
+        }
+
         AddScore(200);
-        StartCoroutine(ProcessMatches());
     }
 
     public void ClearColumn(int col)
     {
+        List<Candy> specialCandiesToTrigger = new List<Candy>();
+        List<Candy> candiesToShrink = new List<Candy>();
+
         for (int row = 0; row < gridHeight; row++)
         {
             if (candyGrid[row, col] != null)
             {
-                StartCoroutine(ShrinkCandy(candyGrid[row, col]));
+                Candy candy = candyGrid[row, col];
+                if (candy.isSpecial)
+                {
+                    specialCandiesToTrigger.Add(candy);
+                }
+                candiesToShrink.Add(candy);
                 candyGrid[row, col] = null;
             }
         }
-        StartCoroutine(FillEmptySpaces());
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                StartCoroutine(ShrinkCandy(candy));
+            }
+        }
+
+        foreach (Candy candy in specialCandiesToTrigger)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                candy.TriggerSpecialEffect();
+            }
+        }
+
         AddScore(200);
-        StartCoroutine(ProcessMatches());
     }
 
     public void ClearArea(int row, int col)
     {
+        List<Candy> specialCandiesToTrigger = new List<Candy>();
+        List<Candy> candiesToShrink = new List<Candy>();
+
         for (int i = -1; i <= 1; i++)
         {
             for (int j = -1; j <= 1; j++)
@@ -514,14 +592,241 @@ public class GameManager : MonoBehaviour
                 int c = col + j;
                 if (r >= 0 && r < gridHeight && c >= 0 && c < gridWidth && candyGrid[r, c] != null)
                 {
-                    StartCoroutine(ShrinkCandy(candyGrid[r, c]));
+                    Candy candy = candyGrid[r, c];
+                    if (candy.isSpecial)
+                    {
+                        specialCandiesToTrigger.Add(candy);
+                    }
+                    candiesToShrink.Add(candy);
                     candyGrid[r, c] = null;
                 }
             }
         }
-        StartCoroutine(FillEmptySpaces());
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                StartCoroutine(ShrinkCandy(candy));
+            }
+        }
+
+        foreach (Candy candy in specialCandiesToTrigger)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                candy.TriggerSpecialEffect();
+            }
+        }
+
         AddScore(300);
-        StartCoroutine(ProcessMatches());
+    }
+
+    public void ClearLargeArea(int row, int col)
+    {
+        List<Candy> specialCandiesToTrigger = new List<Candy>();
+        List<Candy> candiesToShrink = new List<Candy>();
+
+        for (int i = -2; i <= 2; i++)
+        {
+            for (int j = -2; j <= 2; j++)
+            {
+                int r = row + i;
+                int c = col + j;
+                if (r >= 0 && r < gridHeight && c >= 0 && c < gridWidth && candyGrid[r, c] != null)
+                {
+                    Candy candy = candyGrid[r, c];
+                    if (candy.isSpecial)
+                    {
+                        specialCandiesToTrigger.Add(candy);
+                    }
+                    candiesToShrink.Add(candy);
+                    candyGrid[r, c] = null;
+                }
+            }
+        }
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                StartCoroutine(ShrinkCandy(candy));
+            }
+        }
+
+        foreach (Candy candy in specialCandiesToTrigger)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                candy.TriggerSpecialEffect();
+            }
+        }
+
+        AddScore(500);
+    }
+
+    public void ClearMultipleRows(int centerRow)
+    {
+        for (int row = centerRow - 1; row <= centerRow + 1; row++)
+        {
+            if (row >= 0 && row < gridHeight)
+            {
+                ClearRow(row);
+            }
+        }
+    }
+
+    public void ClearMultipleColumns(int centerCol)
+    {
+        for (int col = centerCol - 1; col <= centerCol + 1; col++)
+        {
+            if (col >= 0 && col < gridWidth)
+            {
+                ClearColumn(col);
+            }
+        }
+    }
+
+    public void ClearColorType(CandyType type)
+    {
+        List<Candy> specialCandiesToTrigger = new List<Candy>();
+        List<Candy> candiesToShrink = new List<Candy>();
+
+        for (int row = 0; row < gridHeight; row++)
+        {
+            for (int col = 0; col < gridWidth; col++)
+            {
+                if (candyGrid[row, col] != null && candyGrid[row, col].type == type)
+                {
+                    Candy candy = candyGrid[row, col];
+                    if (candy.isSpecial)
+                    {
+                        specialCandiesToTrigger.Add(candy);
+                    }
+                    candiesToShrink.Add(candy);
+                    candyGrid[row, col] = null;
+                }
+            }
+        }
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                StartCoroutine(ShrinkCandy(candy));
+            }
+        }
+
+        foreach (Candy candy in specialCandiesToTrigger)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                candy.TriggerSpecialEffect();
+            }
+        }
+
+        AddScore(500);
+    }
+
+    public void ClearAll()
+    {
+        List<Candy> specialCandiesToTrigger = new List<Candy>();
+        List<Candy> candiesToShrink = new List<Candy>();
+
+        for (int row = 0; row < gridHeight; row++)
+        {
+            for (int col = 0; col < gridWidth; col++)
+            {
+                if (candyGrid[row, col] != null)
+                {
+                    Candy candy = candyGrid[row, col];
+                    if (candy.isSpecial)
+                    {
+                        specialCandiesToTrigger.Add(candy);
+                    }
+                    candiesToShrink.Add(candy);
+                    candyGrid[row, col] = null;
+                }
+            }
+        }
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                StartCoroutine(ShrinkCandy(candy));
+            }
+        }
+
+        foreach (Candy candy in specialCandiesToTrigger)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
+                candy.TriggerSpecialEffect();
+            }
+        }
+
+        AddScore(1000);
+    }
+
+    IEnumerator ActivateStripedCandies(CandyType type)
+    {
+        List<(int row, int col)> positions = new List<(int, int)>();
+        for (int row = 0; row < gridHeight; row++)
+        {
+            for (int col = 0; col < gridWidth; col++)
+            {
+                if (candyGrid[row, col] != null && candyGrid[row, col].type == type)
+                {
+                    positions.Add((row, col));
+                }
+            }
+        }
+
+        foreach (var pos in positions)
+        {
+            if (candyGrid[pos.row, pos.col] != null)
+            {
+                Destroy(candyGrid[pos.row, pos.col].gameObject);
+                candyGrid[pos.row, pos.col] = null;
+                Candy.SpecialType stripedType = Random.Range(0, 2) == 0 ?
+                    Candy.SpecialType.StripedHorizontal : Candy.SpecialType.StripedVertical;
+                yield return StartCoroutine(SpawnCandy(pos.row, pos.col, false, stripedType));
+                if (candyGrid[pos.row, pos.col] != null)
+                {
+                    candyGrid[pos.row, pos.col].TriggerSpecialEffect();
+                }
+            }
+        }
+    }
+
+    IEnumerator ActivateWrappedCandies(CandyType type)
+    {
+        List<(int row, int col)> positions = new List<(int, int)>();
+        for (int row = 0; row < gridHeight; row++)
+        {
+            for (int col = 0; col < gridWidth; col++)
+            {
+                if (candyGrid[row, col] != null && candyGrid[row, col].type == type)
+                {
+                    positions.Add((row, col));
+                }
+            }
+        }
+
+        foreach (var pos in positions)
+        {
+            if (candyGrid[pos.row, pos.col] != null)
+            {
+                Destroy(candyGrid[pos.row, pos.col].gameObject);
+                candyGrid[pos.row, pos.col] = null;
+                yield return StartCoroutine(SpawnCandy(pos.row, pos.col, false, Candy.SpecialType.Wrapped));
+                if (candyGrid[pos.row, pos.col] != null)
+                {
+                    candyGrid[pos.row, pos.col].TriggerSpecialEffect();
+                }
+            }
+        }
     }
 
     IEnumerator ProcessMatches()
@@ -531,19 +836,26 @@ public class GameManager : MonoBehaviour
 
         foreach (Candy candy in matches)
         {
-            if (candy != null && !candy.isSpecial)
+            if (candy != null && !candy.isSpecial && candy.gameObject != null)
             {
                 StartCoroutine(ShrinkCandy(candy));
             }
         }
-        Debug.Log(specialCandies.Count);
+        Debug.Log($"Special candies count: {specialCandies.Count}");
+        foreach (var special in specialCandies)
+        {
+            Debug.Log($"Processing special candy at ({special.pos.x}, {special.pos.y}): {special.type}");
+        }
         yield return new WaitForSeconds(0.3f);
 
         ClearMatches(matches);
         foreach (var special in specialCandies)
         {
             Vector2Int pos = special.pos;
-            ReplaceWithSpecialCandy(pos.x, pos.y, special.type);
+            if (pos.x >= 0 && pos.x < gridHeight && pos.y >= 0 && pos.y < gridWidth)
+            {
+                ReplaceWithSpecialCandy(pos.x, pos.y, special.type);
+            }
         }
         specialCandies.Clear();
         yield return StartCoroutine(FillEmptySpaces());
@@ -556,18 +868,29 @@ public class GameManager : MonoBehaviour
 
     IEnumerator ShrinkCandy(Candy candy)
     {
+        if (candy == null || candy.gameObject == null) yield break;
+
         float shrinkTime = 0.3f;
         float elapsed = 0f;
-        Vector3 originalScale = candy.transform.localScale;
+        Transform candyTransform = candy.transform;
+        Vector3 originalScale = candyTransform.localScale;
 
         while (elapsed < shrinkTime)
         {
+            if (candy == null || candyTransform == null || candy.gameObject == null)
+            {
+                yield break;
+            }
             elapsed += Time.deltaTime;
             float t = elapsed / shrinkTime;
-            candy.transform.localScale = Vector3.Lerp(originalScale, Vector3.zero, t);
+            candyTransform.localScale = Vector3.Lerp(originalScale, Vector3.zero, t);
             yield return null;
         }
-        Destroy(candy.gameObject);
+
+        if (candy != null && candy.gameObject != null)
+        {
+            Destroy(candy.gameObject);
+        }
     }
 
     void ClearMatches(List<Candy> matches)
@@ -635,7 +958,12 @@ public class GameManager : MonoBehaviour
             Destroy(candyGrid[row, col].gameObject);
             candyGrid[row, col] = null;
         }
-
         StartCoroutine(SpawnCandy(row, col, false, specialType));
+    }
+
+    void AddScore(int points)
+    {
+        score += points;
+        UpdateScoreUI();
     }
 }

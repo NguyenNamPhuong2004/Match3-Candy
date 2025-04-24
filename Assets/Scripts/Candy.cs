@@ -3,13 +3,14 @@ using System.Collections;
 
 public class Candy : MonoBehaviour
 {
-    public enum SpecialType { None, StripedHorizontal, StripedVertical, Wrapped }
+    public enum SpecialType { None, StripedHorizontal, StripedVertical, Wrapped, ColorBomb }
     public CandyType type;
     public SpecialType specialType = SpecialType.None;
-    public int row { get; set; }
-    public int column { get; set; }
+    public int row;
+    public int column;
     public bool isSpecial = false;
     public bool isMatched = false;
+    private bool isTriggered = false;
 
     private void OnMouseDown()
     {
@@ -19,9 +20,10 @@ public class Candy : MonoBehaviour
         }
     }
 
-    public void TriggerSpecialEffect()
+    public void TriggerSpecialEffect(Candy otherCandy = null)
     {
-        if (!isSpecial) return;
+        if (!isSpecial || isTriggered) return; 
+        isTriggered = true; 
 
         switch (specialType)
         {
@@ -33,6 +35,17 @@ public class Candy : MonoBehaviour
                 break;
             case SpecialType.Wrapped:
                 GameManager.instance.ClearArea(row, column);
+                break;
+            case SpecialType.ColorBomb:
+                if (otherCandy != null)
+                {
+                    GameManager.instance.ClearColorType(otherCandy.type);
+                }
+                else
+                {
+                    CandyType[] types = (CandyType[])System.Enum.GetValues(typeof(CandyType));
+                    GameManager.instance.ClearColorType(types[Random.Range(0, types.Length)]);
+                }
                 break;
         }
     }
@@ -53,5 +66,9 @@ public class Candy : MonoBehaviour
             yield return null;
         }
         transform.position = target;
+    }
+    public void ResetTrigger()
+    {
+        isTriggered = false;
     }
 }
