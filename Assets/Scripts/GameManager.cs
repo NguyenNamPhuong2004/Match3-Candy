@@ -166,6 +166,12 @@ public class GameManager : MonoBehaviour
                         ClearLargeArea(candy2.row, candy2.column);
                         AddScore(1500);
                     }
+                    else if (candy2.specialType == Candy.SpecialType.StripedHorizontal || candy2.specialType == Candy.SpecialType.StripedVertical)
+                    {
+                        ClearMultipleRows(candy1.row);
+                        ClearMultipleColumns(candy1.column);
+                        AddScore(1500);
+                    }
                     else if (candy2.specialType == Candy.SpecialType.ColorBomb)
                     {
                         StartCoroutine(ActivateWrappedCandies(candy1.type));
@@ -303,7 +309,7 @@ public class GameManager : MonoBehaviour
                         specialCandies.Add((new Vector2Int(row, col + 1), Candy.SpecialType.StripedVertical));
                     }
                     AddScore(matchLength * 100);
-                    col += matchLength; // Bỏ qua các cột đã xử lý
+                    col += matchLength;
                 }
                 else
                 {
@@ -343,7 +349,7 @@ public class GameManager : MonoBehaviour
                         specialCandies.Add((new Vector2Int(row + 1, col), Candy.SpecialType.StripedHorizontal));
                     }
                     AddScore(matchLength * 100);
-                    row += matchLength; // Bỏ qua các hàng đã xử lý
+                    row += matchLength;
                 }
                 else
                 {
@@ -436,18 +442,37 @@ public class GameManager : MonoBehaviour
     {
         if (row + 2 >= gridHeight || col + 2 >= gridWidth) return false;
 
-        bool TryMatchPattern(int[] rows, int[] cols, Vector2Int wrappedPos)
+        bool TryMatchPattern(int[] rows, int[] cols, Vector2Int wrappedPos, string patternName)
         {
             Candy reference = candyGrid[row + rows[0], col + cols[0]];
-            if (reference == null) return false;
+            if (reference == null)
+            {
+                Debug.Log($"T-Shape {patternName} tại ({row}, {col}): Kẹo tham chiếu là null");
+                return false;
+            }
+            Debug.Log($"T-Shape {patternName} tại ({row}, {col}): Loại kẹo tham chiếu = {reference.type}");
 
             for (int i = 1; i < 5; i++)
             {
                 int r = row + rows[i];
                 int c = col + cols[i];
-                if (r < 0 || r >= gridHeight || c < 0 || c < gridWidth || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type)
+                if (r < 0 || r >= gridHeight || c < 0 || c >= gridWidth)
+                {
+                    Debug.Log($"T-Shape {patternName} tại ({row}, {col}): Ngoài giới hạn tại ({r}, {c})");
                     return false;
+                }
+                if (candyGrid[r, c] == null)
+                {
+                    Debug.Log($"T-Shape {patternName} tại ({row}, {col}): Kẹo null tại ({r}, {c})");
+                    return false;
+                }
+                if (candyGrid[r, c].type != reference.type)
+                {
+                    Debug.Log($"T-Shape {patternName} tại ({row}, {col}): Loại không khớp tại ({r}, {c}), mong đợi {reference.type}, nhận được {candyGrid[r, c].type}");
+                    return false;
+                }
             }
+            Debug.Log($"T-Shape {patternName} khớp tại ({row}, {col}), thêm Wrapped tại ({row + wrappedPos.x}, {col + wrappedPos.y})");
             for (int i = 0; i < 5; i++)
             {
                 int r = row + rows[i];
@@ -458,22 +483,26 @@ public class GameManager : MonoBehaviour
             specialCandies.Add((new Vector2Int(row + wrappedPos.x, col + wrappedPos.y), Candy.SpecialType.Wrapped));
             return true;
         }
+        
+        int[] t1Rows = { 0, 0, 0, 1, 2 };
+        int[] t1Cols = { 0, 1, 2, 1, 1 };
+        if (TryMatchPattern(t1Rows, t1Cols, new Vector2Int(0, 1), "T1")) return true;
 
-        int[] t1Rows = { 0, 1, 2, 2, 2 };
-        int[] t1Cols = { 1, 1, 0, 1, 2 };
-        if (TryMatchPattern(t1Rows, t1Cols, new Vector2Int(2, 1))) return true;
-
-        int[] t2Rows = { 0, 0, 0, 1, 2 };
+       
+        int[] t2Rows = { 2, 2, 2, 1, 0 };
         int[] t2Cols = { 0, 1, 2, 1, 1 };
-        if (TryMatchPattern(t2Rows, t2Cols, new Vector2Int(0, 1))) return true;
+        if (TryMatchPattern(t2Rows, t2Cols, new Vector2Int(2, 1), "T2")) return true;
 
+        
         int[] t3Rows = { 0, 1, 1, 1, 2 };
-        int[] t3Cols = { 0, 0, 1, 2, 0 };
-        if (TryMatchPattern(t3Rows, t3Cols, new Vector2Int(1, 0))) return true;
+        int[] t3Cols = { 2, 0, 1, 2, 2 };
+        if (TryMatchPattern(t3Rows, t3Cols, new Vector2Int(1, 2), "T3")) return true;
 
+        
         int[] t4Rows = { 0, 1, 1, 1, 2 };
-        int[] t4Cols = { 2, 0, 1, 2, 2 };
-        if (TryMatchPattern(t4Rows, t4Cols, new Vector2Int(1, 2))) return true;
+        int[] t4Cols = { 0, 0, 1, 2, 0 };
+        if (TryMatchPattern(t4Rows, t4Cols, new Vector2Int(1, 0), "T4")) return true;
+
 
         return false;
     }
