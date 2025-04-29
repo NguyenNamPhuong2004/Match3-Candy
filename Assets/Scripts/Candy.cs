@@ -3,50 +3,20 @@ using System.Collections;
 
 public class Candy : MonoBehaviour
 {
-    public enum SpecialType { None, StripedHorizontal, StripedVertical, Wrapped, ColorBomb }
     public CandyType type;
-    public SpecialType specialType = SpecialType.None;
+    public SpecialCandyType specialType = SpecialCandyType.None;
     public int row;
     public int column;
     public bool isSpecial = false;
     public bool isMatched = false;
+    public bool isLocked = false;
     private bool isTriggered = false;
 
     private void OnMouseDown()
     {
-        if (GameManager.instance != null)
+        if (!isLocked && SwapManager.Ins != null)
         {
-            GameManager.instance.SelectCandy(this);
-        }
-    }
-
-    public void TriggerSpecialEffect(Candy otherCandy = null)
-    {
-        if (!isSpecial || isTriggered) return; 
-        isTriggered = true; 
-
-        switch (specialType)
-        {
-            case SpecialType.StripedHorizontal:
-                GameManager.instance.ClearRow(row);
-                break;
-            case SpecialType.StripedVertical:
-                GameManager.instance.ClearColumn(column);
-                break;
-            case SpecialType.Wrapped:
-                GameManager.instance.ClearArea(row, column);
-                break;
-            case SpecialType.ColorBomb:
-                if (otherCandy != null)
-                {
-                    GameManager.instance.ClearColorType(otherCandy.type);
-                }
-                else
-                {
-                    CandyType[] types = (CandyType[])System.Enum.GetValues(typeof(CandyType));
-                    GameManager.instance.ClearColorType(types[Random.Range(0, types.Length)]);
-                }
-                break;
+            SwapManager.Ins.SelectCandy(this);
         }
     }
 
@@ -55,7 +25,7 @@ public class Candy : MonoBehaviour
         StartCoroutine(MoveCoroutine(target));
     }
 
-    IEnumerator MoveCoroutine(Vector3 target)
+    private IEnumerator MoveCoroutine(Vector3 target)
     {
         float t = 0;
         Vector3 start = transform.position;
@@ -67,6 +37,7 @@ public class Candy : MonoBehaviour
         }
         transform.position = target;
     }
+
     public void ResetTrigger()
     {
         isTriggered = false;
