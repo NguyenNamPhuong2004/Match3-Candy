@@ -10,7 +10,7 @@ public class Candy : MonoBehaviour
     public bool isSpecial = false;
     public bool isMatched = false;
     public bool isLocked = false;
-    private bool isTriggered = false;
+    public bool isTriggered = false;
 
     private void OnMouseDown()
     {
@@ -42,4 +42,5 @@ public class Candy : MonoBehaviour
     {
         isTriggered = false;
     }
+   
 }

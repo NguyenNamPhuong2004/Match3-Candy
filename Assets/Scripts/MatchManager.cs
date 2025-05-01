@@ -22,6 +22,15 @@ public class MatchManager : Singleton<MatchManager>
         HashSet<Candy> processedCandies = new HashSet<Candy>();
         specialCandies.Clear();
 
+        // Check L và T
+        for (int row = 0; row < GRID_HEIGHT - 2; row++)
+        {
+            for (int col = 0; col < GRID_WIDTH - 2; col++)
+            {
+                CheckLShape(row, col, processedCandies);
+                CheckTShape(row, col, processedCandies);
+            }
+        }
         // Check ngang
         for (int row = 0; row < GRID_HEIGHT; row++)
         {
@@ -49,10 +58,12 @@ public class MatchManager : Singleton<MatchManager>
                     }
                     if (matchLength >= 5)
                     {
+                        LevelManager.Ins.OnCandyMatched(candyGrid[row, col + 2]);
                         specialCandies.Add((new Vector2Int(row, col + 2), SpecialCandyType.ColorBomb));
                     }
                     else if (matchLength == 4)
                     {
+                        LevelManager.Ins.OnCandyMatched(candyGrid[row, col + 1]);
                         specialCandies.Add((new Vector2Int(row, col + 1), SpecialCandyType.StripedVertical));
                     }
                     col += matchLength;
@@ -91,10 +102,12 @@ public class MatchManager : Singleton<MatchManager>
                     }
                     if (matchLength >= 5)
                     {
+                        LevelManager.Ins.OnCandyMatched(candyGrid[row + 2, col]);
                         specialCandies.Add((new Vector2Int(row + 2, col), SpecialCandyType.ColorBomb));
                     }
                     else if (matchLength == 4)
                     {
+                        LevelManager.Ins.OnCandyMatched(candyGrid[row + 1, col]);
                         specialCandies.Add((new Vector2Int(row + 1, col), SpecialCandyType.StripedHorizontal));
                     }
                     row += matchLength;
@@ -106,15 +119,7 @@ public class MatchManager : Singleton<MatchManager>
             }
         }
 
-        // Check L và T
-        for (int row = 0; row < GRID_HEIGHT - 2; row++)
-        {
-            for (int col = 0; col < GRID_WIDTH - 2; col++)
-            {
-                CheckLShape(row, col, processedCandies);
-                CheckTShape(row, col, processedCandies);
-            }
-        }
+       
 
         // Cập nhật UI
         UIManager.Ins.UpdateUI();
@@ -150,7 +155,7 @@ public class MatchManager : Singleton<MatchManager>
             {
                 int r = row + rows[i];
                 int c = col + cols[i];
-                if (r < 0 || r >= GRID_HEIGHT || c < 0 || c < GRID_WIDTH || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type || GridManager.Ins.IsEmptyTile(new Vector2Int(r, c)))
+                if (r < 0 || r >= GRID_HEIGHT || c < 0 || c >= GRID_WIDTH || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type || GridManager.Ins.IsEmptyTile(new Vector2Int(r, c)))
                     return false;
             }
             for (int i = 0; i < 5; i++)
@@ -201,7 +206,7 @@ public class MatchManager : Singleton<MatchManager>
             {
                 int r = row + rows[i];
                 int c = col + cols[i];
-                if (r < 0 || r >= GRID_HEIGHT || c < 0 || c < GRID_WIDTH || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type || GridManager.Ins.IsEmptyTile(new Vector2Int(r, c)))
+                if (r < 0 || r >= GRID_HEIGHT || c < 0 || c >= GRID_WIDTH || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type || GridManager.Ins.IsEmptyTile(new Vector2Int(r, c)))
                     return false;
             }
             for (int i = 0; i < 5; i++)
