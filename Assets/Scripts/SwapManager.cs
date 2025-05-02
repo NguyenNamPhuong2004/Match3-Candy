@@ -33,7 +33,7 @@ public class SwapManager : Singleton<SwapManager>
     public void SelectCandy(Candy candy)
     {
         if (isProcessing || candy.isLocked) return;
-
+        SoundManager.Ins.ClickCandySound();
         if (firstSelectedCandy == null)
         {
             firstSelectedCandy = candy;
@@ -126,5 +126,6 @@ public class SwapManager : Singleton<SwapManager>
         candy1.column = candy2.column;
         candy2.row = tempRow;
         candy2.column = tempCol;
+        SoundManager.Ins.SwapCandySound();
     }
 }

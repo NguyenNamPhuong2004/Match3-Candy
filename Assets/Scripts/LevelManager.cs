@@ -15,7 +15,7 @@ public class LevelManager : Singleton<LevelManager>
     public void Initialize(LevelData[] levels)
     {
         this.levels = levels;
-        currentLevelIndex = 0;
+        currentLevelIndex = DataPlayer.GetLevelGame() - 1;
         LoadCurrentLevel();
         Debug.Log($"LevelManager initialized: level={currentLevel?.level}");
     }
@@ -90,12 +90,5 @@ public class LevelManager : Singleton<LevelManager>
         bool result = remainingSwaps <= 0 && !CheckWin();
         Debug.Log($"CheckLose: remainingSwaps={remainingSwaps}, result={result}");
         return result;
-    }
-
-    public void NextLevel()
-    {
-        currentLevelIndex++;
-        LoadCurrentLevel();
-        Debug.Log($"NextLevel: currentLevelIndex={currentLevelIndex}, level={currentLevel?.level}");
     }
 }

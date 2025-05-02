@@ -145,6 +145,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
 
     public IEnumerator ClearRow(int row, bool postProcess = true)
     {
+        SoundManager.Ins.StrippedSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
 
@@ -190,6 +191,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
 
     public IEnumerator ClearColumn(int col, bool postProcess = true)
     {
+        SoundManager.Ins.StrippedSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
 
@@ -235,6 +237,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
 
     public IEnumerator ClearArea(int row, int col, bool postProcess = true)
     {
+        SoundManager.Ins.WrappedSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
 
@@ -284,6 +287,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
 
     public IEnumerator ClearLargeArea(int row, int col, bool postProcess = true)
     {
+        SoundManager.Ins.WrappedSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
 
@@ -359,6 +363,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
 
     public IEnumerator ClearColorType(CandyType type, bool postProcess = true)
     {
+        SoundManager.Ins.ColorBombSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
 
@@ -408,6 +413,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
 
     public IEnumerator ClearAll(bool postProcess = true)
     {
+        SoundManager.Ins.ColorBombSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
 

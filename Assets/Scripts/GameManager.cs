@@ -59,30 +59,6 @@ public class GameManager : Singleton<GameManager>
         yield return StartCoroutine(GameStateManager.Ins.ProcessMatches());
         UIManager.Ins.UpdateUI();
         isProcessing = false;
-        StartCoroutine(GameLoop());
-    }
-
-    private IEnumerator GameLoop()
-    {
-        while (true)
-        {
-            if (LevelManager.Ins.CheckWin())
-            {
-                Debug.Log("Level Complete!");
-                LevelManager.Ins.NextLevel();
-                if (LevelManager.Ins.currentLevel == null)
-                {
-                    Debug.Log("Game Completed All Levels!");
-                    yield break;
-                }
-                yield return StartCoroutine(InitializeLevel());
-            }
-            else if (LevelManager.Ins.CheckLose())
-            {
-                Debug.Log("Game Over");
-                yield break;
-            }
-            yield return null;
-        }
+       
     }
 }

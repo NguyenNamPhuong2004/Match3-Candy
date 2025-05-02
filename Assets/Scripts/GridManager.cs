@@ -92,6 +92,9 @@ public class GridManager : Singleton<GridManager>
                         specialType == SpecialCandyType.StripedVertical ? 1 :
                         specialType == SpecialCandyType.Wrapped ? 2 : 3;
             prefab = specialCandyPrefabs[index];
+            if (index == 0 || index == 1) SoundManager.Ins.StrippedCreatedSound();
+            if (index == 2 ) SoundManager.Ins.WrappedCreatedSound();
+            if (index == 3 ) SoundManager.Ins.ColorBombCreatedSound();
         }
         else
         {

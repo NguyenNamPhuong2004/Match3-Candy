@@ -1,9 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class UIManager : Singleton<UIManager>
 {
     private Text levelText, swapsLeftText, goalText;
+    public GameObject setting;
+    public GameObject winPanel;
+    public GameObject losePanel;
 
     public void Initialize(Text levelText, Text swapsLeftText, Text goalText)
     {
@@ -36,5 +40,41 @@ public class UIManager : Singleton<UIManager>
         }
         goalText.text = goalStr;
         Debug.Log($"UpdateUI: swapsLeft={levelManager.remainingSwaps}, goals={goalStr}");
+    }
+    public void OpenSetting()
+    {
+        SoundManager.Ins.ButtonSound();
+        setting.SetActive(true);
+    }
+    public void CloseSetting()
+    {
+        SoundManager.Ins.ButtonSound();
+        setting.SetActive(false);
+    }
+    public void OpenWinPanel()
+    {
+        SoundManager.Ins.ButtonSound();
+        winPanel.SetActive(true);
+    }
+    public void OpenLosePanel()
+    {
+        SoundManager.Ins.ButtonSound();
+        losePanel.SetActive(true);
+    }
+    public void Restart()
+    {
+        SoundManager.Ins.ButtonSound();
+        SceneManager.LoadScene(1);
+    } 
+    public void ReturnToMenu()
+    {
+        SoundManager.Ins.ButtonSound();
+        SceneManager.LoadScene(0);
+    }
+    public void NextLevel()
+    {
+        SoundManager.Ins.ButtonSound();
+        DataPlayer.SetLevelGame(DataPlayer.GetLevelGame() + 1);
+        SceneManager.LoadScene(1);
     }
 }

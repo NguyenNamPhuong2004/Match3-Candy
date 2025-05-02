@@ -29,6 +29,7 @@ public class GameStateManager : Singleton<GameStateManager>
                     StartCoroutine(ShrinkCandy(candy));
                 }
             }
+            SoundManager.Ins.MatchCandySound();
             yield return new WaitForSeconds(0.3f);
 
             ClearMatches(matches);
@@ -48,18 +49,15 @@ public class GameStateManager : Singleton<GameStateManager>
         if (LevelManager.Ins.CheckWin())
         {
             Debug.Log("Level Complete!");
-            LevelManager.Ins.NextLevel();
-            if (LevelManager.Ins.currentLevel == null)
-            {
-                Debug.Log("Game Completed All Levels!");
-                yield break;
-            }
-            yield return StartCoroutine(GameManager.Ins.InitializeLevel());
+            UIManager.Ins.OpenWinPanel();
+            SoundManager.Ins.WinSound();
+            if (DataPlayer.GetLevelGame() == DataPlayer.GetUnlockLevelGame()) DataPlayer.SetUnlockLevelGame();
         }
         else if (LevelManager.Ins.CheckLose())
         {
             Debug.Log("Game Over");
-            yield break;
+            UIManager.Ins.OpenLosePanel();
+            SoundManager.Ins.LoseSound();
         }
     }
 
