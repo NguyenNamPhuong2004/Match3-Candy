@@ -45,7 +45,14 @@ public class GameStateManager : Singleton<GameStateManager>
             yield return StartCoroutine(FillEmptySpaces());
         }
 
-        // Kiểm tra win/lose sau khi xử lý toàn bộ match
+        // Check if there are no possible moves and no special candies
+        if (!HasPossibleMoves() && !HasSpecialCandies())
+        {
+            Debug.Log("No valid moves or special candies remain. Clearing all candies.");
+            yield return StartCoroutine(ClearAllCandies());
+        }
+
+        // Check win/lose conditions after processing all matches
         if (LevelManager.Ins.CheckWin())
         {
             Debug.Log("Level Complete!");
@@ -65,7 +72,7 @@ public class GameStateManager : Singleton<GameStateManager>
     {
         if (candy == null || candy.gameObject == null) yield break;
 
-        // Đếm kẹo vào matchedCandiesSet và matchedCandies
+        // Count candy into matchedCandiesSet and matchedCandies
         LevelManager.Ins.OnCandyMatched(candy);
 
         float shrinkTime = 0.3f;
@@ -106,5 +113,93 @@ public class GameStateManager : Singleton<GameStateManager>
     public IEnumerator FillEmptySpaces()
     {
         yield return StartCoroutine(GridManager.Ins.FillEmptySpaces());
+    }
+
+    // Check if there are any possible moves that can create a match
+    public bool HasPossibleMoves()
+    {
+        for (int row = 0; row < GRID_HEIGHT; row++)
+        {
+            for (int col = 0; col < GRID_WIDTH; col++)
+            {
+                // Check swap with right neighbor
+                if (col < GRID_WIDTH - 1)
+                {
+                    SwapCandies(row, col, row, col + 1);
+                    if (MatchManager.Ins.CheckMatches().Count > 0)
+                    {
+                        SwapCandies(row, col, row, col + 1); // Swap back
+                        return true;
+                    }
+                    SwapCandies(row, col, row, col + 1); // Swap back
+                }
+                // Check swap with bottom neighbor
+                if (row < GRID_HEIGHT - 1)
+                {
+                    SwapCandies(row, col, row + 1, col);
+                    if (MatchManager.Ins.CheckMatches().Count > 0)
+                    {
+                        SwapCandies(row, col, row + 1, col); // Swap back
+                        return true;
+                    }
+                    SwapCandies(row, col, row + 1, col); // Swap back
+                }
+            }
+        }
+        return false;
+    }
+
+    // Check if there are any special candies on the grid
+    public bool HasSpecialCandies()
+    {
+        for (int row = 0; row < GRID_HEIGHT; row++)
+        {
+            for (int col = 0; col < GRID_WIDTH; col++)
+            {
+                if (candyGrid[row, col] != null && candyGrid[row, col].isSpecial)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Swap two candies in the grid
+    private void SwapCandies(int row1, int col1, int row2, int col2)
+    {
+        Candy temp = candyGrid[row1, col1];
+        candyGrid[row1, col1] = candyGrid[row2, col2];
+        candyGrid[row2, col2] = temp;
+
+        // Update candy positions
+        if (candyGrid[row1, col1] != null)
+        {
+            candyGrid[row1, col1].row = row1;
+            candyGrid[row1, col1].column = col1;
+        }
+        if (candyGrid[row2, col2] != null)
+        {
+            candyGrid[row2, col2].row = row2;
+            candyGrid[row2, col2].column = col2;
+        }
+    }
+
+    // Clear all candies from the grid
+    private IEnumerator ClearAllCandies()
+    {
+        for (int row = 0; row < GRID_HEIGHT; row++)
+        {
+            for (int col = 0; col < GRID_WIDTH; col++)
+            {
+                if (candyGrid[row, col] != null)
+                {
+                    yield return StartCoroutine(ShrinkCandy(candyGrid[row, col]));
+                    Destroy(candyGrid[row, col].gameObject);
+                    candyGrid[row, col] = null;
+                }
+            }
+        }
+        yield return StartCoroutine(FillEmptySpaces());
     }
 }

@@ -47,7 +47,6 @@ public class SoundManager : Singleton<SoundManager>
     public void Music()
     {
         AufxBackground.clip = music;
-        AufxBackground.Play();
         AufxBackground.playOnAwake = true;
         AufxBackground.loop = true;
     }

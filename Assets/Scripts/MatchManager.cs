@@ -27,6 +27,7 @@ public class MatchManager : Singleton<MatchManager>
         {
             for (int col = 0; col < GRID_WIDTH - 2; col++)
             {
+                if (candyGrid[row, col].type == CandyType.Special) continue;
                 CheckLShape(row, col, processedCandies);
                 CheckTShape(row, col, processedCandies);
             }
@@ -257,7 +258,8 @@ public class MatchManager : Singleton<MatchManager>
                candy1.type == candy2.type && candy1.type == candy3.type &&
                !GridManager.Ins.IsEmptyTile(new Vector2Int(row, col)) &&
                !GridManager.Ins.IsEmptyTile(new Vector2Int(row + rowOffset, col + colOffset)) &&
-               !GridManager.Ins.IsEmptyTile(new Vector2Int(row + 2 * rowOffset, col + 2 * colOffset));
+               !GridManager.Ins.IsEmptyTile(new Vector2Int(row + 2 * rowOffset, col + 2 * colOffset))&&
+               candyGrid[row, col].type != CandyType.Special;
     }
 
     private bool IsValidMatchMore3(int row, int col, int rowOffset, int colOffset)

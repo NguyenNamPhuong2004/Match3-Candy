@@ -9,7 +9,7 @@ public class LevelGame : MonoBehaviour
 
     private void Awake()
     {
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < 10; i++)
         {
             int index = i;
             levelBtns[i] = transform.GetChild(i).GetChild(0).GetComponent<Button>();

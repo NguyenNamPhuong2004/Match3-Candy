@@ -10,5 +10,6 @@ public enum CandyType
    Cake,
    SpongeCake,
    Star,
-   IceCream
+   IceCream,
+   Special
 }
