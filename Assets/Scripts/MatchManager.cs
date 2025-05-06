@@ -27,7 +27,6 @@ public class MatchManager : Singleton<MatchManager>
         {
             for (int col = 0; col < GRID_WIDTH - 2; col++)
             {
-                if (candyGrid[row, col].type == CandyType.Special) continue;
                 CheckLShape(row, col, processedCandies);
                 CheckTShape(row, col, processedCandies);
             }
@@ -145,7 +144,7 @@ public class MatchManager : Singleton<MatchManager>
 
     private bool CheckLShape(int row, int col, HashSet<Candy> matches)
     {
-        if (row + 2 >= GRID_HEIGHT || col + 2 >= GRID_WIDTH) return false;
+        if (row + 2 >= GRID_HEIGHT || col + 2 >= GRID_WIDTH ) return false;
 
         bool TryMatchPattern(int[] rows, int[] cols, Vector2Int wrappedPos)
         {
@@ -156,7 +155,7 @@ public class MatchManager : Singleton<MatchManager>
             {
                 int r = row + rows[i];
                 int c = col + cols[i];
-                if (r < 0 || r >= GRID_HEIGHT || c < 0 || c >= GRID_WIDTH || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type || GridManager.Ins.IsEmptyTile(new Vector2Int(r, c)))
+                if (r < 0 || r >= GRID_HEIGHT || c < 0 || c >= GRID_WIDTH || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type || GridManager.Ins.IsEmptyTile(new Vector2Int(r, c))|| candyGrid[r, c].type == CandyType.Special)
                     return false;
             }
             for (int i = 0; i < 5; i++)
@@ -207,7 +206,7 @@ public class MatchManager : Singleton<MatchManager>
             {
                 int r = row + rows[i];
                 int c = col + cols[i];
-                if (r < 0 || r >= GRID_HEIGHT || c < 0 || c >= GRID_WIDTH || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type || GridManager.Ins.IsEmptyTile(new Vector2Int(r, c)))
+                if (r < 0 || r >= GRID_HEIGHT || c < 0 || c >= GRID_WIDTH || candyGrid[r, c] == null || candyGrid[r, c].type != reference.type || GridManager.Ins.IsEmptyTile(new Vector2Int(r, c)) || candyGrid[r, c].type == CandyType.Special)
                     return false;
             }
             for (int i = 0; i < 5; i++)
