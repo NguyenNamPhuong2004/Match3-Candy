@@ -125,101 +125,105 @@ public class GridManager : Singleton<GridManager>
 
     public IEnumerator FillEmptySpaces()
     {
-        bool moved = false;
-        for (int col = 0; col < GRID_WIDTH; col++)
+        bool moved = true;
+        while (moved)
         {
-            int emptyCount = 0;
-            int nextLockedRow = GRID_HEIGHT; // Vị trí ô khóa gần nhất phía trên
-            for (int row = 0; row < GRID_HEIGHT; row++)
+            moved = false;
+            for (int col = 0; col < GRID_WIDTH; col++)
             {
-                if (candyGrid[row, col] != null && candyGrid[row, col].isLocked)
+                int emptyCount = 0;
+                int nextLockedRow = GRID_HEIGHT; // Vị trí ô khóa gần nhất phía trên
+                for (int row = 0; row < GRID_HEIGHT; row++)
                 {
-                    nextLockedRow = row; // Cập nhật ô khóa gần nhất
-                    emptyCount = 0; // Đặt lại số ô trống
-                    continue;
-                }
-                if (candyGrid[row, col] == null && !emptyTiles.Contains(new Vector2Int(row, col)))
-                {
-                    emptyCount++;
-                    // Kiểm tra xem ô ngay phía trên có phải là ô khóa không
-                    bool isAboveLocked = (row + 1 < GRID_HEIGHT && candyGrid[row + 1, col] != null && candyGrid[row + 1, col].isLocked);
-
-                    if (isAboveLocked)
+                    if (candyGrid[row, col] != null && candyGrid[row, col].isLocked)
                     {
-                        // Thử điền từ ô bên trái hoặc bên phải của ô khóa
-                        List<Vector2Int> candidates = new List<Vector2Int>();
-                        if (col > 0 && candyGrid[row + 1, col - 1] != null && !candyGrid[row + 1, col - 1].isLocked && !emptyTiles.Contains(new Vector2Int(row + 1, col - 1)))
+                        nextLockedRow = row; // Cập nhật ô khóa gần nhất
+                        emptyCount = 0; // Đặt lại số ô trống
+                        continue;
+                    }
+                    if (candyGrid[row, col] == null && !emptyTiles.Contains(new Vector2Int(row, col)))
+                    {
+                        emptyCount++;
+                        // Kiểm tra xem ô ngay phía trên có phải là ô khóa không
+                        bool isAboveLocked = (row + 1 < GRID_HEIGHT && candyGrid[row + 1, col] != null && candyGrid[row + 1, col].isLocked);
+
+                        if (isAboveLocked)
                         {
-                            candidates.Add(new Vector2Int(row + 1, col - 1));
+                            // Thử điền từ ô bên trái hoặc bên phải của ô khóa
+                            List<Vector2Int> candidates = new List<Vector2Int>();
+                            if (col > 0 && candyGrid[row + 1, col - 1] != null && !candyGrid[row + 1, col - 1].isLocked && !emptyTiles.Contains(new Vector2Int(row + 1, col - 1)))
+                            {
+                                candidates.Add(new Vector2Int(row + 1, col - 1));
+                            }
+                            if (col < GRID_WIDTH - 1 && candyGrid[row + 1, col + 1] != null && !candyGrid[row + 1, col + 1].isLocked && !emptyTiles.Contains(new Vector2Int(row + 1, col + 1)))
+                            {
+                                candidates.Add(new Vector2Int(row + 1, col + 1));
+                            }
+                            if (candidates.Count > 0)
+                            {
+                                Vector2Int source = candidates[Random.Range(0, candidates.Count)];
+                                Candy candy = candyGrid[source.x, source.y];
+                                candyGrid[row, col] = candy;
+                                candyGrid[source.x, source.y] = null; // Đặt vị trí cũ thành null
+                                candy.row = row;
+                                candy.column = col;
+                                candy.MoveTo(new Vector3(col, row, 0));
+                                moved = true;
+                                emptyCount--;
+                                continue;
+                            }
                         }
-                        if (col < GRID_WIDTH - 1 && candyGrid[row + 1, col + 1] != null && !candyGrid[row + 1, col + 1].isLocked && !emptyTiles.Contains(new Vector2Int(row + 1, col + 1)))
+
+                        // Nếu ô phía trên không khóa, tìm kẹo không khóa từ trên đến ô khóa gần nhất
+                        bool filled = false;
+                        for (int r = row + 1; r < nextLockedRow; r++)
                         {
-                            candidates.Add(new Vector2Int(row + 1, col + 1));
+                            if (candyGrid[r, col] != null && !candyGrid[r, col].isLocked)
+                            {
+                                Candy candy = candyGrid[r, col];
+                                candyGrid[row, col] = candy;
+                                candyGrid[r, col] = null;
+                                candy.row = row;
+                                candy.MoveTo(new Vector3(col, row, 0));
+                                moved = true;
+                                filled = true;
+                                emptyCount--;
+                                break;
+                            }
                         }
-                        if (candidates.Count > 0)
+
+                        // Nếu không tìm được kẹo, để lại ô trống để sinh kẹo mới
+                        if (!filled)
                         {
-                            Vector2Int source = candidates[Random.Range(0, candidates.Count)];
-                            Candy candy = candyGrid[source.x, source.y];
-                            candyGrid[row, col] = candy;
-                            candyGrid[source.x, source.y] = null;
-                            candy.row = row;
-                            candy.column = col;
-                            candy.MoveTo(new Vector3(col, row, 0));
-                            moved = true;
-                            emptyCount--;
                             continue;
                         }
                     }
-
-                    // Nếu ô phía trên không khóa, tìm kẹo không khóa từ trên đến ô khóa gần nhất
-                    bool filled = false;
-                    for (int r = row + 1; r < nextLockedRow; r++)
+                    else if (emptyCount > 0 && candyGrid[row, col] != null && !candyGrid[row, col].isLocked)
                     {
-                        if (candyGrid[r, col] != null && !candyGrid[r, col].isLocked)
-                        {
-                            Candy candy = candyGrid[r, col];
-                            candyGrid[row, col] = candy;
-                            candyGrid[r, col] = null;
-                            candy.row = row;
-                            candy.MoveTo(new Vector3(col, row, 0));
-                            moved = true;
-                            filled = true;
-                            emptyCount--;
-                            break;
-                        }
-                    }
-
-                    // Nếu không tìm được kẹo, để lại ô trống để sinh kẹo mới
-                    if (!filled)
-                    {
-                        continue;
+                        // Di chuyển kẹo không khóa xuống ô trống thấp nhất
+                        Candy candy = candyGrid[row, col];
+                        candyGrid[row - emptyCount, col] = candy;
+                        candyGrid[row, col] = null;
+                        candy.row = row - emptyCount;
+                        candy.MoveTo(new Vector3(col, row - emptyCount, 0));
+                        moved = true;
                     }
                 }
-                else if (emptyCount > 0 && candyGrid[row, col] != null && !candyGrid[row, col].isLocked)
+
+                // Sinh kẹo mới cho các ô trống còn lại ở phía trên
+                for (int i = 0; i < emptyCount; i++)
                 {
-                    // Di chuyển kẹo không khóa xuống ô trống thấp nhất
-                    Candy candy = candyGrid[row, col];
-                    candyGrid[row - emptyCount, col] = candy;
-                    candyGrid[row, col] = null;
-                    candy.row = row - emptyCount;
-                    candy.MoveTo(new Vector3(col, row - emptyCount, 0));
+                    int row = GRID_HEIGHT - emptyCount + i;
+                    yield return StartCoroutine(SpawnCandy(row, col, true));
                     moved = true;
                 }
             }
 
-            // Sinh kẹo mới cho các ô trống còn lại ở phía trên
-            for (int i = 0; i < emptyCount; i++)
+            if (moved)
             {
-                int row = GRID_HEIGHT - emptyCount + i;
-                yield return StartCoroutine(SpawnCandy(row, col, true));
-                moved = true;
+                yield return new WaitForSeconds(0.3f);
             }
-        }
-
-        if (moved)
-        {
-            yield return new WaitForSeconds(0.3f);
-        }
+        } 
     }
 
     public void ReplaceWithSpecialCandy(int row, int col, SpecialCandyType specialType)

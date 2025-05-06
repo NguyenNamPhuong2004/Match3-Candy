@@ -153,6 +153,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         SoundManager.Ins.StrippedSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
+        List<Vector2Int> clearedPositions = new List<Vector2Int>();
 
         for (int col = 0; col < GRID_WIDTH; col++)
         {
@@ -167,8 +168,22 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
                 {
                     candiesToShrink.Add(candy);
                 }
+                clearedPositions.Add(new Vector2Int(row, col));
                 candyGrid[row, col] = null;
                 Debug.Log($"Cleared candy at ({row}, {col})");
+            }
+        }
+
+        // Clear dirt and locked tiles
+        foreach (var pos in clearedPositions)
+        {
+            if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnDirtTileCleared(pos);
+            }
+            if (LevelManager.Ins.currentLevel.lockedTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnLockedTileCleared(pos);
             }
         }
 
@@ -203,6 +218,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         SoundManager.Ins.StrippedSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
+        List<Vector2Int> clearedPositions = new List<Vector2Int>();
 
         for (int row = 0; row < GRID_HEIGHT; row++)
         {
@@ -217,7 +233,21 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
                 {
                     candiesToShrink.Add(candy);
                 }
+                clearedPositions.Add(new Vector2Int(row, col));
                 candyGrid[row, col] = null;
+            }
+        }
+
+        // Clear dirt and locked tiles
+        foreach (var pos in clearedPositions)
+        {
+            if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnDirtTileCleared(pos);
+            }
+            if (LevelManager.Ins.currentLevel.lockedTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnLockedTileCleared(pos);
             }
         }
 
@@ -250,6 +280,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         SoundManager.Ins.WrappedSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
+        List<Vector2Int> clearedPositions = new List<Vector2Int>();
 
         for (int r = row - 1; r <= row + 1; r++)
         {
@@ -267,8 +298,22 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
                     {
                         candiesToShrink.Add(candy);
                     }
+                    clearedPositions.Add(new Vector2Int(r, c));
                     candyGrid[r, c] = null;
                 }
+            }
+        }
+
+        // Clear dirt and locked tiles
+        foreach (var pos in clearedPositions)
+        {
+            if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnDirtTileCleared(pos);
+            }
+            if (LevelManager.Ins.currentLevel.lockedTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnLockedTileCleared(pos);
             }
         }
 
@@ -301,6 +346,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         SoundManager.Ins.WrappedSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
+        List<Vector2Int> clearedPositions = new List<Vector2Int>();
 
         for (int r = row - 2; r <= row + 2; r++)
         {
@@ -318,8 +364,22 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
                     {
                         candiesToShrink.Add(candy);
                     }
+                    clearedPositions.Add(new Vector2Int(r, c));
                     candyGrid[r, c] = null;
                 }
+            }
+        }
+
+        // Clear dirt and locked tiles
+        foreach (var pos in clearedPositions)
+        {
+            if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnDirtTileCleared(pos);
+            }
+            if (LevelManager.Ins.currentLevel.lockedTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnLockedTileCleared(pos);
             }
         }
 
@@ -378,6 +438,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         SoundManager.Ins.ColorBombSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
+        List<Vector2Int> clearedPositions = new List<Vector2Int>();
 
         for (int row = 0; row < GRID_HEIGHT; row++)
         {
@@ -395,8 +456,22 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
                     {
                         candiesToShrink.Add(candy);
                     }
+                    clearedPositions.Add(new Vector2Int(row, col));
                     candyGrid[row, col] = null;
                 }
+            }
+        }
+
+        // Clear dirt and locked tiles
+        foreach (var pos in clearedPositions)
+        {
+            if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnDirtTileCleared(pos);
+            }
+            if (LevelManager.Ins.currentLevel.lockedTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnLockedTileCleared(pos);
             }
         }
 
@@ -429,6 +504,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         SoundManager.Ins.ColorBombSound();
         List<Candy> specialCandiesToTrigger = new List<Candy>();
         List<Candy> candiesToShrink = new List<Candy>();
+        List<Vector2Int> clearedPositions = new List<Vector2Int>();
 
         for (int row = 0; row < GRID_HEIGHT; row++)
         {
@@ -445,8 +521,22 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
                     {
                         candiesToShrink.Add(candy);
                     }
+                    clearedPositions.Add(new Vector2Int(row, col));
                     candyGrid[row, col] = null;
                 }
+            }
+        }
+
+        // Clear dirt and locked tiles
+        foreach (var pos in clearedPositions)
+        {
+            if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnDirtTileCleared(pos);
+            }
+            if (LevelManager.Ins.currentLevel.lockedTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnLockedTileCleared(pos);
             }
         }
 
@@ -566,6 +656,16 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             candyToDestroy.column >= 0 && candyToDestroy.column < GRID_WIDTH)
         {
             candyGrid[candyToDestroy.row, candyToDestroy.column] = null;
+            // Clear dirt and locked tiles at the special candy's position
+            Vector2Int pos = new Vector2Int(candyToDestroy.row, candyToDestroy.column);
+            if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnDirtTileCleared(pos);
+            }
+            if (LevelManager.Ins.currentLevel.lockedTiles.Exists(t => t == pos))
+            {
+                LevelManager.Ins.OnLockedTileCleared(pos);
+            }
         }
     }
 }

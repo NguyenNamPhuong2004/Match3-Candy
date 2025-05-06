@@ -125,24 +125,34 @@ public class GameStateManager : Singleton<GameStateManager>
                 // Check swap with right neighbor
                 if (col < GRID_WIDTH - 1)
                 {
-                    SwapCandies(row, col, row, col + 1);
-                    if (MatchManager.Ins.CheckMatches().Count > 0)
+                    Candy candy1 = candyGrid[row, col];
+                    Candy candy2 = candyGrid[row, col + 1];
+                    if (candy1 != null && candy2 != null && !candy1.isLocked && !candy2.isLocked)
                     {
+                        SwapCandies(row, col, row, col + 1);
+                        if (MatchManager.Ins.CheckMatches().Count > 0)
+                        {
+                            SwapCandies(row, col, row, col + 1); // Swap back
+                            return true;
+                        }
                         SwapCandies(row, col, row, col + 1); // Swap back
-                        return true;
                     }
-                    SwapCandies(row, col, row, col + 1); // Swap back
                 }
                 // Check swap with bottom neighbor
                 if (row < GRID_HEIGHT - 1)
                 {
-                    SwapCandies(row, col, row + 1, col);
-                    if (MatchManager.Ins.CheckMatches().Count > 0)
+                    Candy candy1 = candyGrid[row, col];
+                    Candy candy2 = candyGrid[row + 1, col];
+                    if (candy1 != null && candy2 != null && !candy1.isLocked && !candy2.isLocked)
                     {
+                        SwapCandies(row, col, row + 1, col);
+                        if (MatchManager.Ins.CheckMatches().Count > 0)
+                        {
+                            SwapCandies(row, col, row + 1, col); // Swap back
+                            return true;
+                        }
                         SwapCandies(row, col, row + 1, col); // Swap back
-                        return true;
                     }
-                    SwapCandies(row, col, row + 1, col); // Swap back
                 }
             }
         }
