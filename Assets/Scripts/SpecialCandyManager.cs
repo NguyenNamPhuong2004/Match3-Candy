@@ -39,13 +39,13 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             if (candy1 != null && candy1.gameObject != null)
             {
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy1));
-                Destroy(candy1.gameObject);
+              //  Destroy(candy1.gameObject);
                 candyGrid[candy1.row, candy1.column] = null;
             }
             if (candy2 != null && candy2.gameObject != null)
             {
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy2));
-                Destroy(candy2.gameObject);
+               // Destroy(candy2.gameObject);
                 candyGrid[candy2.row, candy2.column] = null;
             }
         }
@@ -55,7 +55,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             if (candy1 != null && candy1.gameObject != null)
             {
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy1));
-                Destroy(candy1.gameObject);
+               // Destroy(candy1.gameObject);
                 candyGrid[candy1.row, candy1.column] = null;
             }
         }
@@ -65,7 +65,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             if (candy2 != null && candy2.gameObject != null)
             {
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy2));
-                Destroy(candy2.gameObject);
+              //  Destroy(candy2.gameObject);
                 candyGrid[candy2.row, candy2.column] = null;
             }
         }
@@ -96,14 +96,15 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
     {
         if (other.isSpecial)
         {
+            CandyType[] types = (CandyType[])System.Enum.GetValues(typeof(CandyType));
             switch (other.specialType)
             {
                 case SpecialCandyType.StripedHorizontal:
                 case SpecialCandyType.StripedVertical:
-                    yield return StartCoroutine(ActivateStripedCandies(other.type));
+                    yield return StartCoroutine(ActivateStripedCandies(types[Random.Range(0, types.Length)]));
                     break;
                 case SpecialCandyType.Wrapped:
-                    yield return StartCoroutine(ActivateWrappedCandies(other.type));
+                    yield return StartCoroutine(ActivateWrappedCandies(types[Random.Range(0, types.Length)]));
                     break;
                 default:
                     yield break;
@@ -582,6 +583,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         {
             if (candyGrid[pos.row, pos.col] != null)
             {
+                LevelManager.Ins.OnCandyMatched(candyGrid[pos.row, pos.col]);
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candyGrid[pos.row, pos.col]));
                 candyGrid[pos.row, pos.col] = null;
                 SpecialCandyType stripedType = Random.Range(0, 2) == 0 ?
@@ -613,6 +615,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         {
             if (candyGrid[pos.row, pos.col] != null)
             {
+                LevelManager.Ins.OnCandyMatched(candyGrid[pos.row, pos.col]);
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candyGrid[pos.row, pos.col]));
                 candyGrid[pos.row, pos.col] = null;
                 yield return StartCoroutine(GridManager.Ins.SpawnCandy(pos.row, pos.col, false, SpecialCandyType.Wrapped));
