@@ -3,11 +3,31 @@ using System.Collections.Generic;
 
 public class TileManager : Singleton<TileManager>
 {
-    public void Initialize()
+    public GameObject dirtTilePrefab;
+    public GameObject lockedTilePrefab;
+    public GameObject emptyTilePrefab;
+    protected override void LoadComponents()
     {
-        Debug.Log("TileManager initialized");
+        base.LoadComponents();
+        LoadDirtTilePrefab();
+        LoadLockedTilePrefab();
+        LoadEmptyTilePrefab();
     }
-
+    protected virtual void LoadDirtTilePrefab()
+    {
+        if (this.dirtTilePrefab != null) return;
+        this.dirtTilePrefab = Resources.Load<GameObject>("Prefabs/Object/Dirt");
+    } 
+    protected virtual void LoadLockedTilePrefab()
+    {
+        if (this.lockedTilePrefab != null) return;
+        this.lockedTilePrefab = Resources.Load<GameObject>("Prefabs/Object/Lock");
+    }
+    protected virtual void LoadEmptyTilePrefab()
+    {
+        if (this.emptyTilePrefab != null) return;
+        this.emptyTilePrefab = Resources.Load<GameObject>("Prefabs/Object/Empty");
+    }
     public void ProcessMatchEffects(List<Candy> matches)
     {
         var levelManager = LevelManager.Ins;

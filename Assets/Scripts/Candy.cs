@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Candy : MonoBehaviour
+public class Candy : LoadData
 {
     public CandyType type;
     public SpecialCandyType specialType = SpecialCandyType.None;
@@ -36,11 +36,5 @@ public class Candy : MonoBehaviour
             yield return null;
         }
         transform.position = target;
-    }
-
-    public void ResetTrigger()
-    {
-        isTriggered = false;
-    }
-   
+    }  
 }

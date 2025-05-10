@@ -4,17 +4,53 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : Singleton<UIManager>
 {
-    private Text levelText, swapsLeftText, goalText;
-    public GameObject setting;
-    public GameObject winPanel;
-    public GameObject losePanel;
-
-    public void Initialize(Text levelText, Text swapsLeftText, Text goalText)
+    [SerializeField] private Text levelText, swapsLeftText, goalText;
+    [SerializeField] private GameObject setting;
+    [SerializeField] private GameObject winPanel;
+    [SerializeField] private GameObject losePanel;
+    private void Start()
     {
-        this.levelText = levelText;
-        this.swapsLeftText = swapsLeftText;
-        this.goalText = goalText;
-        Debug.Log("UIManager initialized");
+        UpdateUI();
+    }
+    protected override void LoadComponents()
+    {
+        base.LoadComponents();
+        LoadLevelText();
+        LoadSwapsLeftText();
+        LoadGoalText();
+        LoadSetting();
+        LoadWinPanel();
+        LoadLosePanel();
+    }
+    protected virtual void LoadLevelText()
+    {
+        if (this.levelText != null) return;
+        this.levelText = GameObject.Find("LevelText").GetComponent<Text>();
+    } 
+    protected virtual void LoadSwapsLeftText()
+    {
+        if (this.swapsLeftText != null) return;
+        this.swapsLeftText = GameObject.Find("SwapLeftText").GetComponent<Text>();
+    } 
+    protected virtual void LoadGoalText()
+    {
+        if (this.goalText != null) return;
+        this.goalText = GameObject.Find("GoalText").GetComponent<Text>();
+    }
+    protected virtual void LoadSetting()
+    {
+        if (this.setting != null) return;
+        this.setting = GameObject.Find("UI").transform.Find("Setting").gameObject;
+    }
+    protected virtual void LoadWinPanel()
+    {
+        if (this.winPanel != null) return;
+        this.winPanel = GameObject.Find("UI").transform.Find("Win").gameObject;
+    }
+    protected virtual void LoadLosePanel()
+    {
+        if (this.losePanel != null) return;
+        this.losePanel = GameObject.Find("UI").transform.Find("Lose").gameObject;
     }
 
     public void UpdateUI()

@@ -5,13 +5,27 @@ using System.Collections.Generic;
 public class SpecialCandyManager : Singleton<SpecialCandyManager>
 {
     private Candy[,] candyGrid;
-    private const int GRID_WIDTH = 8;
-    private const int GRID_HEIGHT = 8;
+    public GameObject[] specialCandyPrefabs;
+    private int GRID_WIDTH;
+    private int GRID_HEIGHT;
 
-    public void Initialize()
+    protected override void LoadComponents()
     {
+        base.LoadComponents();
+        LoadSpecialCandyPrefabs();
+    }
+
+    protected override void ResetValue()
+    {
+        base.ResetValue();
         candyGrid = GridManager.Ins.candyGrid;
-        Debug.Log("SpecialCandyManager initialized");
+        GRID_WIDTH = GridManager.Ins.GRID_WIDTH;
+        GRID_HEIGHT = GridManager.Ins.GRID_HEIGHT;
+    }
+
+    protected virtual void LoadSpecialCandyPrefabs()
+    {
+        this.specialCandyPrefabs = Resources.LoadAll<GameObject>("Prefabs/Candy/SpecialCandy");
     }
 
     public IEnumerator ProcessSpecialCandy(Candy candy1, Candy candy2)
@@ -35,17 +49,16 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             {
                 yield return StartCoroutine(ExecuteSpecialPair(candy1, candy2));
             }
-            // Hủy hai kẹo được swap
             if (candy1 != null && candy1.gameObject != null)
             {
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy1));
-              //  Destroy(candy1.gameObject);
+                Destroy(candy1.gameObject);
                 candyGrid[candy1.row, candy1.column] = null;
             }
             if (candy2 != null && candy2.gameObject != null)
             {
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy2));
-               // Destroy(candy2.gameObject);
+                Destroy(candy2.gameObject);
                 candyGrid[candy2.row, candy2.column] = null;
             }
         }
@@ -55,7 +68,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             if (candy1 != null && candy1.gameObject != null)
             {
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy1));
-               // Destroy(candy1.gameObject);
+                Destroy(candy1.gameObject);
                 candyGrid[candy1.row, candy1.column] = null;
             }
         }
@@ -65,7 +78,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             if (candy2 != null && candy2.gameObject != null)
             {
                 yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy2));
-              //  Destroy(candy2.gameObject);
+                Destroy(candy2.gameObject);
                 candyGrid[candy2.row, candy2.column] = null;
             }
         }
@@ -175,7 +188,6 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
-        // Clear dirt and locked tiles
         foreach (var pos in clearedPositions)
         {
             if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
@@ -188,13 +200,26 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
+        List<Coroutine> shrinkCoroutines = new List<Coroutine>();
         foreach (Candy candy in candiesToShrink)
         {
             if (candy != null && candy.gameObject != null)
             {
-                yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy));
+                shrinkCoroutines.Add(StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy)));
+                Debug.Log($"Started shrinking normal candy at ({candy.row}, {candy.column})");
+            }
+        }
+        foreach (Coroutine coroutine in shrinkCoroutines)
+        {
+            yield return coroutine;
+        }
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
                 Destroy(candy.gameObject);
-                Debug.Log($"Shrunk normal candy at ({candy.row}, {candy.column})");
+                Debug.Log($"Destroyed normal candy at ({candy.row}, {candy.column})");
             }
         }
 
@@ -239,7 +264,6 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
-        // Clear dirt and locked tiles
         foreach (var pos in clearedPositions)
         {
             if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
@@ -252,11 +276,23 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
+        List<Coroutine> shrinkCoroutines = new List<Coroutine>();
         foreach (Candy candy in candiesToShrink)
         {
             if (candy != null && candy.gameObject != null)
             {
-                yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy));
+                shrinkCoroutines.Add(StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy)));
+            }
+        }
+        foreach (Coroutine coroutine in shrinkCoroutines)
+        {
+            yield return coroutine;
+        }
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
                 Destroy(candy.gameObject);
             }
         }
@@ -305,7 +341,6 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
-        // Clear dirt and locked tiles
         foreach (var pos in clearedPositions)
         {
             if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
@@ -318,11 +353,23 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
+        List<Coroutine> shrinkCoroutines = new List<Coroutine>();
         foreach (Candy candy in candiesToShrink)
         {
             if (candy != null && candy.gameObject != null)
             {
-                yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy));
+                shrinkCoroutines.Add(StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy)));
+            }
+        }
+        foreach (Coroutine coroutine in shrinkCoroutines)
+        {
+            yield return coroutine;
+        }
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
                 Destroy(candy.gameObject);
             }
         }
@@ -371,7 +418,6 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
-        // Clear dirt and locked tiles
         foreach (var pos in clearedPositions)
         {
             if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
@@ -384,11 +430,23 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
+        List<Coroutine> shrinkCoroutines = new List<Coroutine>();
         foreach (Candy candy in candiesToShrink)
         {
             if (candy != null && candy.gameObject != null)
             {
-                yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy));
+                shrinkCoroutines.Add(StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy)));
+            }
+        }
+        foreach (Coroutine coroutine in shrinkCoroutines)
+        {
+            yield return coroutine;
+        }
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
                 Destroy(candy.gameObject);
             }
         }
@@ -463,7 +521,6 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
-        // Clear dirt and locked tiles
         foreach (var pos in clearedPositions)
         {
             if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
@@ -528,7 +585,6 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
-        // Clear dirt and locked tiles
         foreach (var pos in clearedPositions)
         {
             if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
@@ -541,11 +597,23 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
             }
         }
 
+        List<Coroutine> shrinkCoroutines = new List<Coroutine>();
         foreach (Candy candy in candiesToShrink)
         {
             if (candy != null && candy.gameObject != null)
             {
-                yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy));
+                shrinkCoroutines.Add(StartCoroutine(GameStateManager.Ins.ShrinkCandy(candy)));
+            }
+        }
+        foreach (Coroutine coroutine in shrinkCoroutines)
+        {
+            yield return coroutine;
+        }
+
+        foreach (Candy candy in candiesToShrink)
+        {
+            if (candy != null && candy.gameObject != null)
+            {
                 Destroy(candy.gameObject);
             }
         }
@@ -568,7 +636,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
     private IEnumerator ActivateStripedCandies(CandyType type)
     {
         List<(int row, int col)> positions = new List<(int, int)>();
-        for (int row = 0; row < GRID_HEIGHT; row++)
+        for (int row = 00; row < GRID_HEIGHT; row++)
         {
             for (int col = 0; col < GRID_WIDTH; col++)
             {
@@ -630,7 +698,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
     private IEnumerator TriggerSpecialCandyEffect(Candy candy)
     {
         Debug.Log($"TriggerSpecialCandyEffect: type={candy.specialType}, pos=({candy.row},{candy.column})");
-        Candy candyToDestroy = candy; // Lưu tham chiếu để đảm bảo không bị mất
+        Candy candyToDestroy = candy;
         switch (candyToDestroy.specialType)
         {
             case SpecialCandyType.StripedHorizontal:
@@ -647,19 +715,16 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
                 yield return StartCoroutine(ClearColorType(types[Random.Range(0, types.Length)], false));
                 break;
         }
-        // Luôn hủy kẹo đặc biệt sau khi kích hoạt hiệu ứng
         if (candyToDestroy != null && candyToDestroy.gameObject != null)
         {
             yield return StartCoroutine(GameStateManager.Ins.ShrinkCandy(candyToDestroy));
             Destroy(candyToDestroy.gameObject);
             Debug.Log($"Destroyed special candy at ({candyToDestroy.row}, {candyToDestroy.column})");
         }
-        // Đảm bảo vị trí trong lưới được đặt thành null
         if (candyToDestroy.row >= 0 && candyToDestroy.row < GRID_HEIGHT &&
             candyToDestroy.column >= 0 && candyToDestroy.column < GRID_WIDTH)
         {
             candyGrid[candyToDestroy.row, candyToDestroy.column] = null;
-            // Clear dirt and locked tiles at the special candy's position
             Vector2Int pos = new Vector2Int(candyToDestroy.row, candyToDestroy.column);
             if (LevelManager.Ins.currentLevel.dirtTiles.Exists(t => t == pos))
             {

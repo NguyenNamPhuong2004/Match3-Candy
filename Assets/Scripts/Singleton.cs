@@ -24,6 +24,7 @@
 
         protected override void Awake()
         {
+            base.Awake();
             MakeSingleton(false);
         }
 

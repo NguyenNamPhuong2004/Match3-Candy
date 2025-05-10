@@ -25,6 +25,10 @@ public class SoundManager : Singleton<SoundManager>
             AufxClick = gameObject.AddComponent<AudioSource>();
             AufxClick.playOnAwake = false;
         }
+        if (AufxBackground == null)
+        {
+            AufxBackground = gameObject.AddComponent<AudioSource>();
+        }
     }
     protected override void Awake()
     {

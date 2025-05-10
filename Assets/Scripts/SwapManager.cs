@@ -4,31 +4,9 @@ using System.Collections.Generic;
 
 public class SwapManager : Singleton<SwapManager>
 {
-    private Candy[,] candyGrid;
     private Candy firstSelectedCandy;
     private bool isProcessing;
-
-    public void Initialize()
-    {
-        candyGrid = GridManager.Ins.candyGrid;
-        Debug.Log("SwapManager initialized");
-    }
-
-    void Update()
-    {
-        if (isProcessing || Input.GetMouseButtonDown(0))
-        {
-            RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-            if (hit.collider != null)
-            {
-                Candy candy = hit.collider.GetComponent<Candy>();
-                if (candy != null)
-                {
-                    SelectCandy(candy);
-                }
-            }
-        }
-    }
+   
 
     public void SelectCandy(Candy candy)
     {
@@ -117,8 +95,8 @@ public class SwapManager : Singleton<SwapManager>
 
     private void SwapCandies(Candy candy1, Candy candy2)
     {
-        candyGrid[candy1.row, candy1.column] = candy2;
-        candyGrid[candy2.row, candy2.column] = candy1;
+        GridManager.Ins.candyGrid[candy1.row, candy1.column] = candy2;
+        GridManager.Ins.candyGrid[candy2.row, candy2.column] = candy1;
 
         int tempRow = candy1.row;
         int tempCol = candy1.column;

@@ -4,16 +4,18 @@ using System.Collections.Generic;
 public class MatchManager : Singleton<MatchManager>
 {
     private Candy[,] candyGrid;
-    private const int GRID_WIDTH = 8;
-    private const int GRID_HEIGHT = 8;
+    private int GRID_WIDTH;
+    private int GRID_HEIGHT;
     public List<Candy> lastMatches;
     private List<(Vector2Int pos, SpecialCandyType type)> specialCandies = new List<(Vector2Int, SpecialCandyType)>();
 
-    public void Initialize()
+    protected override void ResetValue()
     {
+        base.ResetValue();
         candyGrid = GridManager.Ins.candyGrid;
+        GRID_WIDTH = GridManager.Ins.GRID_WIDTH;
+        GRID_HEIGHT = GridManager.Ins.GRID_HEIGHT;
         lastMatches = new List<Candy>();
-        Debug.Log("MatchManager initialized");
     }
 
     public List<Candy> CheckMatches()
@@ -21,7 +23,18 @@ public class MatchManager : Singleton<MatchManager>
         lastMatches.Clear();
         HashSet<Candy> processedCandies = new HashSet<Candy>();
         specialCandies.Clear();
-
+        int candyCount = 0;
+        for (int row = 0; row < GRID_HEIGHT; row++)
+        {
+            for (int col = 0; col < GRID_WIDTH; col++)
+            {
+                if (candyGrid[row, col] != null && !GridManager.Ins.IsEmptyTile(new Vector2Int(row, col)))
+                {
+                    candyCount++;
+                }
+            }
+        }
+        Debug.Log($"CheckMatches: candyGrid initialized with {candyCount} candies");
         // Check L và T
         for (int row = 0; row < GRID_HEIGHT - 2; row++)
         {

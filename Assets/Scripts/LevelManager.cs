@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class LevelManager : Singleton<LevelManager>
 {
     public LevelData currentLevel;
-    private LevelData[] levels;
+    [SerializeField] private LevelData[] levels;
     private int currentLevelIndex;
     public int remainingSwaps;
     public Dictionary<CandyType, int> matchedCandies; // Đếm kẹo match theo loại
@@ -12,16 +13,24 @@ public class LevelManager : Singleton<LevelManager>
     public HashSet<Vector2Int> clearedDirtTiles;
     public HashSet<Vector2Int> clearedLockedTiles;
 
-    public void Initialize(LevelData[] levels)
+    protected override void LoadComponents()
     {
-        this.levels = levels;
-        currentLevelIndex = DataPlayer.GetLevelGame() - 1;
-        LoadCurrentLevel();
-        Debug.Log($"LevelManager initialized: level={currentLevel?.level}");
+        base.LoadComponents();
+        LoadLevels();
     }
-
+    protected override void ResetValue()
+    {
+        base.ResetValue();
+        LoadCurrentLevel();
+    }
+    protected virtual void LoadLevels()
+    {
+      //  if (this.levels != null) return;
+        this.levels = Resources.LoadAll<LevelData>("Prefabs/LevelData");
+    }
     private void LoadCurrentLevel()
     {
+        currentLevelIndex = DataPlayer.GetLevelGame() - 1;
         if (currentLevelIndex >= levels.Length)
         {
             currentLevel = null;

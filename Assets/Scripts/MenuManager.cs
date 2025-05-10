@@ -6,6 +6,22 @@ public class MenuManager : Singleton<MenuManager>
 {
     public GameObject levelPanel;
     public GameObject setting;
+    protected override void LoadComponents()
+    {
+        base.LoadComponents();
+        LoadSetting();
+        LoadLevelPanel();
+    }
+    protected virtual void LoadSetting()
+    {
+        if (this.setting != null) return;
+        this.setting = GameObject.Find("Setting");
+    }
+    protected virtual void LoadLevelPanel()
+    {
+        if (this.levelPanel != null) return;
+        this.levelPanel = GameObject.Find("LevelSystemUI");
+    }
     public void OpenLevelPanel()
     {
         SoundManager.Ins.ButtonSound();

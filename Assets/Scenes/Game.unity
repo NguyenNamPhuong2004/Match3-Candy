@@ -1129,6 +1129,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03accd00d95ba794c98dbe8084fbd952, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  specialCandyPrefabs:
+  - {fileID: 8400692291886326403, guid: 140d208abbf6b544e9770a0524650042, type: 3}
+  - {fileID: 8400692291886326403, guid: c104b93307dce5a4ba002477fb628c5c, type: 3}
+  - {fileID: 8400692291886326403, guid: 9d7bf92e0b1bfb542b8c7c1c7c688c6b, type: 3}
+  - {fileID: 3689332886976680734, guid: 0081b7e282ba65147bcccae871fa6512, type: 3}
 --- !u!4 &441349514
 Transform:
   m_ObjectHideFlags: 0
@@ -1556,6 +1561,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54962a67deefe1f44958eafb5baf4f28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  candyPrefabs:
+  - {fileID: 3689332886976680734, guid: 32ec838f79b12424a86bbef625153efb, type: 3}
+  - {fileID: 3689332886976680734, guid: 6d6f0b863e404f74d867a1ea0ed38765, type: 3}
+  - {fileID: 3689332886976680734, guid: fa4910f8961e1f440976826a4302e348, type: 3}
+  - {fileID: 3689332886976680734, guid: fc3525af0cf9fa6499476c267f9439df, type: 3}
+  - {fileID: 3689332886976680734, guid: cfd3ec43ef8edde49bd3bdd9733dd450, type: 3}
+  - {fileID: 3689332886976680734, guid: 751032eb80ccfc346902e2f2ceb8938e, type: 3}
+  - {fileID: 3689332886976680734, guid: 7567fac857b43424cbf3421fb62e104a, type: 3}
+  GRID_WIDTH: 8
+  GRID_HEIGHT: 8
 --- !u!4 &578251707
 Transform:
   m_ObjectHideFlags: 0
@@ -2215,7 +2230,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 779133416}
-  - component: {fileID: 779133415}
+  - component: {fileID: 779133417}
   m_Layer: 0
   m_Name: LevelManager
   m_TagString: Untagged
@@ -2223,20 +2238,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &779133415
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 779133414}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adc01f8ca627b7147a3ebc63068d6d29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentLevel: {fileID: 0}
-  remainingSwaps: 0
 --- !u!4 &779133416
 Transform:
   m_ObjectHideFlags: 0
@@ -2252,6 +2253,31 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &779133417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 779133414}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc01f8ca627b7147a3ebc63068d6d29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentLevel: {fileID: 11400000, guid: dfe7a4c820af2be4caddf7c4662524e7, type: 2}
+  levels:
+  - {fileID: 11400000, guid: dfe7a4c820af2be4caddf7c4662524e7, type: 2}
+  - {fileID: 11400000, guid: 27fa11e1b80dd044fa4c6efba23b5bb7, type: 2}
+  - {fileID: 11400000, guid: 5b2c0469d5e850346b4fe75c5962f8e7, type: 2}
+  - {fileID: 11400000, guid: 8dd6d6eceaa44214f9c23efd83b06656, type: 2}
+  - {fileID: 11400000, guid: f4258022bcb005149b5ebddb31abc45f, type: 2}
+  - {fileID: 11400000, guid: 940c7f00c912f634886f53ee5e607296, type: 2}
+  - {fileID: 11400000, guid: 81c984d26e3f79b4982f03cca5500fc5, type: 2}
+  - {fileID: 11400000, guid: f2ed8a36a858ef54a93ba0e5e407dc75, type: 2}
+  - {fileID: 11400000, guid: edb1704a1eb89d04096610228b8151db, type: 2}
+  - {fileID: 11400000, guid: 8f8f03f264ba22a4c970d0ebf729b1e2, type: 2}
+  remainingSwaps: 15
 --- !u!1 &867478602
 GameObject:
   m_ObjectHideFlags: 0
@@ -2281,6 +2307,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82de6be4286d52546b1ee503e363febc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  levelText: {fileID: 1302534969}
+  swapsLeftText: {fileID: 1980965407}
+  goalText: {fileID: 2058735781}
   setting: {fileID: 1905954712}
   winPanel: {fileID: 1506243902}
   losePanel: {fileID: 1780125678}
@@ -2328,6 +2357,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1684a18f33c74147b2f4c4bda8e2a06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dirtTilePrefab: {fileID: 2495420955636644187, guid: d7cd0c2a0027feb49990b3955e90b83d, type: 3}
+  lockedTilePrefab: {fileID: 8637276068758688522, guid: 624da8fcc1a9b0b44bbc0373b741c72f, type: 3}
+  emptyTilePrefab: {fileID: 5889675807825198513, guid: 5c71ac9c8a6df7e49889c64d82d28435, type: 3}
 --- !u!4 &876041539
 Transform:
   m_ObjectHideFlags: 0
@@ -2516,7 +2548,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 924065246}
-  - component: {fileID: 924065245}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2524,48 +2555,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &924065245
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 924065244}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a194ba3907d883b478f67634bf7d87ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  candyPrefabs:
-  - {fileID: 3689332886976680734, guid: 32ec838f79b12424a86bbef625153efb, type: 3}
-  - {fileID: 3689332886976680734, guid: 6d6f0b863e404f74d867a1ea0ed38765, type: 3}
-  - {fileID: 3689332886976680734, guid: fa4910f8961e1f440976826a4302e348, type: 3}
-  - {fileID: 3689332886976680734, guid: fc3525af0cf9fa6499476c267f9439df, type: 3}
-  - {fileID: 3689332886976680734, guid: cfd3ec43ef8edde49bd3bdd9733dd450, type: 3}
-  - {fileID: 3689332886976680734, guid: 751032eb80ccfc346902e2f2ceb8938e, type: 3}
-  - {fileID: 3689332886976680734, guid: 7567fac857b43424cbf3421fb62e104a, type: 3}
-  specialCandyPrefabs:
-  - {fileID: 8400692291886326403, guid: 140d208abbf6b544e9770a0524650042, type: 3}
-  - {fileID: 8400692291886326403, guid: c104b93307dce5a4ba002477fb628c5c, type: 3}
-  - {fileID: 8400692291886326403, guid: 9d7bf92e0b1bfb542b8c7c1c7c688c6b, type: 3}
-  - {fileID: 3689332886976680734, guid: 0081b7e282ba65147bcccae871fa6512, type: 3}
-  dirtTilePrefab: {fileID: 2495420955636644187, guid: d7cd0c2a0027feb49990b3955e90b83d, type: 3}
-  lockedTilePrefab: {fileID: 8637276068758688522, guid: 624da8fcc1a9b0b44bbc0373b741c72f, type: 3}
-  emptyTilePrefab: {fileID: 5889675807825198513, guid: 5c71ac9c8a6df7e49889c64d82d28435, type: 3}
-  levels:
-  - {fileID: 11400000, guid: dfe7a4c820af2be4caddf7c4662524e7, type: 2}
-  - {fileID: 11400000, guid: 27fa11e1b80dd044fa4c6efba23b5bb7, type: 2}
-  - {fileID: 11400000, guid: 5b2c0469d5e850346b4fe75c5962f8e7, type: 2}
-  - {fileID: 11400000, guid: 8dd6d6eceaa44214f9c23efd83b06656, type: 2}
-  - {fileID: 11400000, guid: f4258022bcb005149b5ebddb31abc45f, type: 2}
-  - {fileID: 11400000, guid: 940c7f00c912f634886f53ee5e607296, type: 2}
-  - {fileID: 11400000, guid: 81c984d26e3f79b4982f03cca5500fc5, type: 2}
-  - {fileID: 11400000, guid: f2ed8a36a858ef54a93ba0e5e407dc75, type: 2}
-  - {fileID: 11400000, guid: edb1704a1eb89d04096610228b8151db, type: 2}
-  - {fileID: 11400000, guid: 8f8f03f264ba22a4c970d0ebf729b1e2, type: 2}
-  levelText: {fileID: 1302534969}
-  swapsLeftText: {fileID: 1980965407}
-  goalText: {fileID: 2058735781}
 --- !u!4 &924065246
 Transform:
   m_ObjectHideFlags: 0
@@ -2988,7 +2977,7 @@ GameObject:
   - component: {fileID: 1302534970}
   - component: {fileID: 1302534969}
   m_Layer: 5
-  m_Name: Level
+  m_Name: LevelText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3724,7 +3713,7 @@ GameObject:
   - component: {fileID: 1980965408}
   - component: {fileID: 1980965407}
   m_Layer: 5
-  m_Name: Swap
+  m_Name: SwapLeftText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

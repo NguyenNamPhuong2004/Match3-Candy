@@ -5,64 +5,66 @@ using System.Collections.Generic;
 public class GridManager : Singleton<GridManager>
 {
     public Candy[,] candyGrid = new Candy[8, 8];
-    private LevelData levelData;
-    private GameObject[] candyPrefabs;
-    private GameObject[] specialCandyPrefabs;
-    private GameObject dirtTilePrefab;
-    private GameObject lockedTilePrefab;
-    private GameObject emptyTilePrefab;
+    [SerializeField] private GameObject[] candyPrefabs;
     private Dictionary<Vector2Int, GameObject> dirtTileObjects = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<Vector2Int, GameObject> lockedTileObjects = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<Vector2Int, GameObject> emptyTileObjects = new Dictionary<Vector2Int, GameObject>();
     private HashSet<Vector2Int> emptyTiles;
-    private const int GRID_WIDTH = 8;
-    private const int GRID_HEIGHT = 8;
 
-    public void Initialize(LevelData levelData, GameObject[] candyPrefabs, GameObject[] specialCandyPrefabs, GameObject dirtTilePrefab, GameObject lockedTilePrefab, GameObject emptyTilePrefab)
+    public int GRID_WIDTH = 8;
+    public int GRID_HEIGHT = 8;
+    private void Start()
     {
-        this.levelData = levelData;
-        this.candyPrefabs = candyPrefabs;
-        this.specialCandyPrefabs = specialCandyPrefabs;
-        this.dirtTilePrefab = dirtTilePrefab;
-        this.lockedTilePrefab = lockedTilePrefab;
-        this.emptyTilePrefab = emptyTilePrefab;
-        this.emptyTiles = new HashSet<Vector2Int>(levelData.emptyTiles);
+        emptyTiles = new HashSet<Vector2Int>(LevelManager.Ins.currentLevel.emptyTiles);
+        StartCoroutine(InitializeBoard());
+    }
+    protected override void LoadComponents()
+    {
+        base.LoadComponents();
+        LoadCandyPrefabs();
+    }
+    protected override void ResetValue()
+    {
+        base.ResetValue();
         dirtTileObjects.Clear();
         lockedTileObjects.Clear();
         emptyTileObjects.Clear();
-        Debug.Log("GridManager initialized");
     }
-
+    protected virtual void LoadCandyPrefabs()
+    {
+        // if (this.candyPrefabs != null) return;
+        this.candyPrefabs = Resources.LoadAll<GameObject>("Prefabs/Candy/NormalCandy");
+    }
     public IEnumerator InitializeBoard()
     {
-        if (emptyTilePrefab != null)
+        if (TileManager.Ins.emptyTilePrefab != null)
         {
-            foreach (var pos in levelData.emptyTiles)
+            foreach (var pos in LevelManager.Ins.currentLevel.emptyTiles)
             {
-                GameObject emptyObj = Instantiate(emptyTilePrefab, new Vector3(pos.y, pos.x, 0), Quaternion.identity);
+                GameObject emptyObj = Instantiate(TileManager.Ins.emptyTilePrefab, new Vector3(pos.y, pos.x, 0), Quaternion.identity);
                 emptyTileObjects[pos] = emptyObj;
             }
         }
 
-        if (dirtTilePrefab != null)
+        if (TileManager.Ins.dirtTilePrefab != null)
         {
-            foreach (var pos in levelData.dirtTiles)
+            foreach (var pos in LevelManager.Ins.currentLevel.dirtTiles)
             {
                 if (!emptyTiles.Contains(pos))
                 {
-                    GameObject dirtObj = Instantiate(dirtTilePrefab, new Vector3(pos.y, pos.x, 0), Quaternion.identity);
+                    GameObject dirtObj = Instantiate(TileManager.Ins.dirtTilePrefab, new Vector3(pos.y, pos.x, 0), Quaternion.identity);
                     dirtTileObjects[pos] = dirtObj;
                 }
             }
         }
 
-        if (lockedTilePrefab != null)
+        if (TileManager.Ins.lockedTilePrefab != null)
         {
-            foreach (var pos in levelData.lockedTiles)
+            foreach (var pos in LevelManager.Ins.currentLevel.lockedTiles)
             {
                 if (!emptyTiles.Contains(pos))
                 {
-                    GameObject lockedObj = Instantiate(lockedTilePrefab, new Vector3(pos.y, pos.x, 0), Quaternion.identity);
+                    GameObject lockedObj = Instantiate(TileManager.Ins.lockedTilePrefab, new Vector3(pos.y, pos.x, 0), Quaternion.identity);
                     lockedTileObjects[pos] = lockedObj;
                 }
             }
@@ -90,7 +92,7 @@ public class GridManager : Singleton<GridManager>
             int index = specialType == SpecialCandyType.StripedHorizontal ? 0 :
                         specialType == SpecialCandyType.StripedVertical ? 1 :
                         specialType == SpecialCandyType.Wrapped ? 2 : 3;
-            prefab = specialCandyPrefabs[index];
+            prefab = SpecialCandyManager.Ins.specialCandyPrefabs[index];
             if (index == 0 || index == 1) SoundManager.Ins.StrippedCreatedSound();
             if (index == 2) SoundManager.Ins.WrappedCreatedSound();
             if (index == 3) SoundManager.Ins.ColorBombCreatedSound();
@@ -107,7 +109,7 @@ public class GridManager : Singleton<GridManager>
         candy.column = col;
         candy.isSpecial = specialType != SpecialCandyType.None;
         candy.specialType = specialType;
-        candy.isLocked = levelData.lockedTiles.Exists(t => t == new Vector2Int(row, col));
+        candy.isLocked = LevelManager.Ins.currentLevel.lockedTiles.Exists(t => t == new Vector2Int(row, col));
         candyGrid[row, col] = candy;
 
         if (withDrop)

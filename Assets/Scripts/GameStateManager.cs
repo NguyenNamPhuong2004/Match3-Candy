@@ -5,13 +5,56 @@ using System.Collections.Generic;
 public class GameStateManager : Singleton<GameStateManager>
 {
     private Candy[,] candyGrid;
-    private const int GRID_WIDTH = 8;
-    private const int GRID_HEIGHT = 8;
+    private int GRID_WIDTH;
+    private int GRID_HEIGHT;
 
-    public void Initialize()
+    protected override void ResetValue()
     {
+        base.ResetValue();
         candyGrid = GridManager.Ins.candyGrid;
-        Debug.Log("GameStateManager initialized");
+        GRID_WIDTH = GridManager.Ins.GRID_WIDTH;
+        GRID_HEIGHT = GridManager.Ins.GRID_HEIGHT;
+    }
+
+    private void Start()
+    {
+        StartCoroutine(InitializeAndProcessMatches());
+    }
+
+    private IEnumerator InitializeAndProcessMatches()
+    {
+        // Đợi GridManager khởi tạo
+        while (GridManager.Ins == null || GridManager.Ins.candyGrid == null)
+        {
+            Debug.LogWarning("Waiting for GridManager to initialize");
+            yield return null;
+        }
+
+        // Đợi candyGrid được điền đầy đủ
+        int candyCount = 0;
+        while (candyCount < (GRID_WIDTH * GRID_HEIGHT)) 
+        {
+            candyCount = 0;
+            for (int row = 0; row < GRID_HEIGHT; row++)
+            {
+                for (int col = 0; col < GRID_WIDTH; col++)
+                {
+                    if (GridManager.Ins.candyGrid[row, col] != null && !GridManager.Ins.IsEmptyTile(new Vector2Int(row, col)))
+                    {
+                        candyCount++;
+                    }
+                }
+            }
+            if (candyCount < (GRID_WIDTH * GRID_HEIGHT))
+            {
+                Debug.LogWarning($"candyGrid has only {candyCount} candies, waiting for GridManager to fill");
+                yield return null;
+            }
+        }
+        Debug.Log($"GameStateManager: candyGrid initialized with {candyCount} candies");
+
+        // Tiến hành ProcessMatches
+        yield return StartCoroutine(ProcessMatches());
     }
 
     public IEnumerator ProcessMatches()
@@ -45,14 +88,13 @@ public class GameStateManager : Singleton<GameStateManager>
             yield return StartCoroutine(FillEmptySpaces());
         }
 
-        // Check if there are no possible moves and no special candies
         if (!HasPossibleMoves() && !HasSpecialCandies())
         {
             Debug.Log("No valid moves or special candies remain. Clearing all candies.");
             yield return StartCoroutine(ClearAllCandies());
         }
 
-        // Check win/lose conditions after processing all matches
+        
         if (LevelManager.Ins.CheckWin())
         {
             Debug.Log("Level Complete!");
@@ -72,7 +114,7 @@ public class GameStateManager : Singleton<GameStateManager>
     {
         if (candy == null || candy.gameObject == null) yield break;
 
-        // Count candy into matchedCandiesSet and matchedCandies
+    
         LevelManager.Ins.OnCandyMatched(candy);
 
         float shrinkTime = 0.3f;
@@ -115,14 +157,14 @@ public class GameStateManager : Singleton<GameStateManager>
         yield return StartCoroutine(GridManager.Ins.FillEmptySpaces());
     }
 
-    // Check if there are any possible moves that can create a match
+    
     public bool HasPossibleMoves()
     {
         for (int row = 0; row < GRID_HEIGHT; row++)
         {
             for (int col = 0; col < GRID_WIDTH; col++)
             {
-                // Check swap with right neighbor
+               
                 if (col < GRID_WIDTH - 1)
                 {
                     Candy candy1 = candyGrid[row, col];
@@ -132,13 +174,13 @@ public class GameStateManager : Singleton<GameStateManager>
                         SwapCandies(row, col, row, col + 1);
                         if (MatchManager.Ins.CheckMatches().Count > 0)
                         {
-                            SwapCandies(row, col, row, col + 1); // Swap back
+                            SwapCandies(row, col, row, col + 1); 
                             return true;
                         }
-                        SwapCandies(row, col, row, col + 1); // Swap back
+                        SwapCandies(row, col, row, col + 1);
                     }
                 }
-                // Check swap with bottom neighbor
+               
                 if (row < GRID_HEIGHT - 1)
                 {
                     Candy candy1 = candyGrid[row, col];
@@ -148,10 +190,10 @@ public class GameStateManager : Singleton<GameStateManager>
                         SwapCandies(row, col, row + 1, col);
                         if (MatchManager.Ins.CheckMatches().Count > 0)
                         {
-                            SwapCandies(row, col, row + 1, col); // Swap back
+                            SwapCandies(row, col, row + 1, col);
                             return true;
                         }
-                        SwapCandies(row, col, row + 1, col); // Swap back
+                        SwapCandies(row, col, row + 1, col);
                     }
                 }
             }
@@ -159,7 +201,7 @@ public class GameStateManager : Singleton<GameStateManager>
         return false;
     }
 
-    // Check if there are any special candies on the grid
+  
     public bool HasSpecialCandies()
     {
         for (int row = 0; row < GRID_HEIGHT; row++)
@@ -175,7 +217,7 @@ public class GameStateManager : Singleton<GameStateManager>
         return false;
     }
 
-    // Swap two candies in the grid
+   
     private void SwapCandies(int row1, int col1, int row2, int col2)
     {
         Candy temp = candyGrid[row1, col1];
@@ -195,7 +237,6 @@ public class GameStateManager : Singleton<GameStateManager>
         }
     }
 
-    // Clear all candies from the grid
     private IEnumerator ClearAllCandies()
     {
         for (int row = 0; row < GRID_HEIGHT; row++)
