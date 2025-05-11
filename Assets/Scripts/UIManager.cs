@@ -100,34 +100,32 @@ public class UIManager : Singleton<UIManager>
         levelText.text = "Level: " + levelManager.currentLevel.level;
         swapsLeftText.text = "Swaps Left: " + levelManager.remainingSwaps;
 
-        // Xóa các GoalItem cũ trong goalContainer
         foreach (Transform child in goalContainer.transform)
         {
             Destroy(child.gameObject);
         }
 
-        // Thêm mục tiêu cho Dirt Tiles
         if (levelManager.currentLevel.clearAllDirtTiles)
         {
             GameObject goalItem = Instantiate(goalItemPrefab, goalContainer.transform);
             Text countText = goalItem.GetComponentInChildren<Text>();
             countText.text = $"{levelManager.clearedDirtTiles.Count}/{levelManager.currentLevel.dirtTiles.Count}";
             Image candyImage = goalItem.GetComponentInChildren<Image>();
-            candyImage.sprite = dirtTileSprite; // Có thể dùng Sprite riêng cho Dirt Tiles
+            candyImage.sprite = dirtTileSprite;
+            candyImage.preserveAspect = true;
         }
-
-        // Thêm mục tiêu cho Locked Tiles
+      
         if (levelManager.currentLevel.clearAllLockedTiles)
         {
             GameObject goalItem = Instantiate(goalItemPrefab, goalContainer.transform);
             Text countText = goalItem.GetComponentInChildren<Text>();
             countText.text = $"{levelManager.clearedLockedTiles.Count}/{levelManager.currentLevel.lockedTiles.Count}";
             Image candyImage = goalItem.GetComponentInChildren<Image>();
-            candyImage.sprite = lockedTileSprite;// Có thể dùng Sprite riêng cho Locked Tiles
-            candyImage.color = new Color(1, 1, 1, 0.4f);                                    
+            candyImage.sprite = lockedTileSprite;
+            candyImage.color = new Color(1, 1, 1, 0.4f);
+            candyImage.preserveAspect = true;
         }
 
-        // Thêm mục tiêu cho kẹo
         foreach (var goal in levelManager.currentLevel.goals)
         {
             GameObject goalItem = Instantiate(goalItemPrefab, goalContainer.transform);
@@ -135,14 +133,15 @@ public class UIManager : Singleton<UIManager>
             int matched = levelManager.matchedCandies.ContainsKey(goal.type) ? levelManager.matchedCandies[goal.type] : 0;
             countText.text = $"{matched}/{goal.count}";
             Image candyImage = goalItem.GetComponentInChildren<Image>();
-            int spriteIndex = (int)goal.type; // Giả định CandyType là enum với thứ tự khớp với candySprites
+            int spriteIndex = (int)goal.type;
             if (spriteIndex >= 0 && spriteIndex < candySprites.Length)
             {
                 candyImage.sprite = candySprites[spriteIndex];
+                candyImage.preserveAspect = true;
             }
             else
             {
-                candyImage.gameObject.SetActive(false); // Ẩn nếu không có Sprite
+                candyImage.gameObject.SetActive(false);
             }
         }
 

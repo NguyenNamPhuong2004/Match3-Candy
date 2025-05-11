@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level 02
   m_EditorClassIdentifier: 
   level: 2
-  swapLimit: 15
+  swapLimit: 20
   goals:
   - type: 2
     count: 20

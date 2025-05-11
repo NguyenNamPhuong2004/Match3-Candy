@@ -641,7 +641,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         {
             for (int col = 0; col < GRID_WIDTH; col++)
             {
-                if (candyGrid[row, col] != null && candyGrid[row, col].type == type)
+                if (candyGrid[row, col] != null && candyGrid[row, col].type == type && !candyGrid[row, col].isLocked)
                 {
                     positions.Add((row, col));
                 }
@@ -673,7 +673,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
         {
             for (int col = 0; col < GRID_WIDTH; col++)
             {
-                if (candyGrid[row, col] != null && candyGrid[row, col].type == type)
+                if (candyGrid[row, col] != null && candyGrid[row, col].type == type && !candyGrid[row, col].isLocked)
                 {
                     positions.Add((row, col));
                 }

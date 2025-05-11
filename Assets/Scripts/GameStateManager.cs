@@ -236,7 +236,7 @@ public class GameStateManager : Singleton<GameStateManager>
         {
             for (int col = 0; col < GRID_WIDTH; col++)
             {
-                if (candyGrid[row, col] != null)
+                if (candyGrid[row, col] != null && !candyGrid[row, col].isLocked)
                 {
                     shrinkCoroutines.Add(StartCoroutine(ShrinkCandy(candyGrid[row, col])));
                     candyGrid[row, col] = null;
