@@ -25,7 +25,7 @@ public class LevelManager : Singleton<LevelManager>
     }
     protected virtual void LoadLevels()
     {
-      //  if (this.levels != null) return;
+        if (this.levels != null && this.levels.Length > 0 ) return;
         this.levels = Resources.LoadAll<LevelData>("Prefabs/LevelData");
     }
     private void LoadCurrentLevel()

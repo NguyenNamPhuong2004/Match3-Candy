@@ -25,6 +25,7 @@ public class SpecialCandyManager : Singleton<SpecialCandyManager>
 
     protected virtual void LoadSpecialCandyPrefabs()
     {
+        if (this.specialCandyPrefabs != null && this.specialCandyPrefabs.Length > 0) return;
         this.specialCandyPrefabs = Resources.LoadAll<GameObject>("Prefabs/Candy/SpecialCandy");
     }
 

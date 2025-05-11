@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum CandyType
-{
-   Donut,
-   YellowCandy,
-   PinkCandy,
+{     
    Cake,
+   Donut,
+   IceCream,
+   PinkCandy,
    SpongeCake,
    Star,
-   IceCream,
+   YellowCandy,
    Special
 }

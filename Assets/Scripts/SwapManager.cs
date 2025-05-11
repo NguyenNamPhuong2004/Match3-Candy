@@ -6,7 +6,6 @@ public class SwapManager : Singleton<SwapManager>
 {
     private Candy firstSelectedCandy;
     private bool isProcessing;
-   
 
     public void SelectCandy(Candy candy)
     {
@@ -44,23 +43,27 @@ public class SwapManager : Singleton<SwapManager>
         SwapCandies(candy1, candy2);
 
         bool hasSpecialEffect = candy1.isSpecial || candy2.isSpecial;
-        List<Candy> matches = MatchManager.Ins.CheckMatches();
+        List<Vector2Int> swapPositions = new List<Vector2Int>
+        {
+            new Vector2Int(candy1.row, candy1.column),
+            new Vector2Int(candy2.row, candy2.column)
+        };
+        Debug.Log($"SwapManager: Swap positions={string.Join(", ", swapPositions)}");
+        List<Candy> matches = MatchManager.Ins.CheckMatches(swapPositions);
 
         if (hasSpecialEffect)
         {
             LevelManager.Ins.OnSwap();
             UIManager.Ins.UpdateUI();
-            yield return StartCoroutine(GameStateManager.Ins.ProcessMatches());
             yield return StartCoroutine(SpecialCandyManager.Ins.ProcessSpecialCandy(candy1, candy2));
-            yield return StartCoroutine(GameStateManager.Ins.FillEmptySpaces());
-            yield return StartCoroutine(GameStateManager.Ins.ProcessMatches());
+            yield return StartCoroutine(GameStateManager.Ins.ProcessMatches(swapPositions));          
         }
         else if (matches.Count > 0)
         {
             LevelManager.Ins.OnSwap();
             UIManager.Ins.UpdateUI();
-            Debug.Log($"ProcessSwap: matches={matches.Count}");
-            yield return StartCoroutine(GameStateManager.Ins.ProcessMatches());
+            Debug.Log($"SwapManager: matches={matches.Count}");
+            yield return StartCoroutine(GameStateManager.Ins.ProcessMatches(swapPositions));
         }
         else
         {

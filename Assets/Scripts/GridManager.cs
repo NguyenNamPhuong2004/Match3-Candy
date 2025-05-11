@@ -32,7 +32,7 @@ public class GridManager : Singleton<GridManager>
     }
     protected virtual void LoadCandyPrefabs()
     {
-        // if (this.candyPrefabs != null) return;
+        if (this.candyPrefabs != null && this.candyPrefabs.Length > 0) return;
         this.candyPrefabs = Resources.LoadAll<GameObject>("Prefabs/Candy/NormalCandy");
     }
     public IEnumerator InitializeBoard()

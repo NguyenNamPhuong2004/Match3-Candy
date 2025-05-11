@@ -8,6 +8,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -3156705280848941317, guid: 1aacd3e2db2731d43a57aa61fd7fbf82, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.x
+      value: 1.3
+      objectReference: {fileID: 0}
+    - target: {fileID: -3156705280848941317, guid: 1aacd3e2db2731d43a57aa61fd7fbf82, type: 3}
+      propertyPath: m_SpriteTilingProperty.oldSize.y
+      value: 1.27
+      objectReference: {fileID: 0}
     - target: {fileID: 3866620789162808493, guid: 1aacd3e2db2731d43a57aa61fd7fbf82, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -54,12 +62,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4284917305067793321, guid: 1aacd3e2db2731d43a57aa61fd7fbf82, type: 3}
       propertyPath: type
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5040164204205923236, guid: 1aacd3e2db2731d43a57aa61fd7fbf82, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: ee54771f6383c82458be98806edee984, type: 3}
+    - target: {fileID: 5040164204205923236, guid: 1aacd3e2db2731d43a57aa61fd7fbf82, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8400692291886326403, guid: 1aacd3e2db2731d43a57aa61fd7fbf82, type: 3}
       propertyPath: m_Name
       value: PinkCandy
